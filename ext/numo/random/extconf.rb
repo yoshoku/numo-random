@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "mkmf"
 require "numo/narray"
 
@@ -23,5 +21,9 @@ if RUBY_PLATFORM =~ /mswin|cygwin|mingw/
 end
 
 abort "libstdc++ is not found." unless have_library("stdc++")
+
+$CXXFLAGS << " -std=c++11"
+$INCFLAGS << " -I$(srcdir)/src"
+$VPATH << "$(srcdir)/src"
 
 create_makefile("numo/random/randomext")

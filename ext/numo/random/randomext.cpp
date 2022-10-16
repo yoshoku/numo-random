@@ -33,5 +33,6 @@
 extern "C" void Init_randomext(void) {
   rb_require("numo/narray");
 
-  VALUE mRandom = rb_define_module_under(mNumo, "Random");
+  VALUE rb_mNumoRandom = rb_define_module_under(mNumo, "Random");
+  RbNumoRandomPCG64::define_class(rb_mNumoRandom);
 }
