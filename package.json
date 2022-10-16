@@ -1,0 +1,15 @@
+{
+  "name": "numo-random",
+  "repository": "git@github.com:yoshoku/numo-random.git",
+  "author": "Atsushi Tatsuma <yoshoku@outlook.com>",
+  "license": "BSD-3-Clause",
+  "private": true,
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
+    "husky": "^8.0.1"
+  }
+}
