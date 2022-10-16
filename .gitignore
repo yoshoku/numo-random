@@ -1,0 +1,18 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+/node_modules/
+
+# rspec failure tracking
+.rspec_status
+*.swp
+*.bundle
+*.lock
+mkmf.log
+tags
+.DS_Store
