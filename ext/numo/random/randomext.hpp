@@ -71,6 +71,7 @@ public:
     rb_define_method(rb_cPCG64, "seed=", RUBY_METHOD_FUNC(_numo_random_pcg64_set_seed), 1);
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
+    rb_define_method(rb_cPCG64, "normal", RUBY_METHOD_FUNC(_numo_random_pcg64_normal), -1);
     return rb_cPCG64;
   }
 
@@ -111,6 +112,59 @@ private:
     pcg64* ptr = get_pcg64(self);
     const double x = uniform_dist(*ptr);
     return DBL2NUM(x);
+  }
+
+  typedef struct {
+    double loc;
+    double scale;
+    pcg64* rnd;
+  } normal_opt_t;
+
+  template<typename T> static void iter_normal(na_loop_t* const lp) {
+    normal_opt_t* g = (normal_opt_t*)(lp->opt_ptr);
+    std::normal_distribution<T> normal_dist(g->loc, g->scale);
+
+    size_t i;
+    char* p1;
+    ssize_t s1;
+    size_t* idx1;
+    INIT_COUNTER(lp, i);
+    INIT_PTR_IDX(lp, 0, p1, s1, idx1);
+
+    if (idx1) {
+      for (; i--;) {
+        SET_DATA_INDEX(p1, idx1, T, normal_dist(*(g->rnd)));
+      }
+    } else {
+      for (; i--;) {
+        SET_DATA_STRIDE(p1, s1, T, normal_dist(*(g->rnd)));
+      }
+    }
+  }
+
+  static VALUE _numo_random_pcg64_normal(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("loc"), rb_intern("scale") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
+
+    VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    pcg64* ptr = get_pcg64(self);
+    normal_opt_t g = { 0.0, 1.0, ptr };
+    if (kw_values[0] != Qundef) g.loc = NUM2DBL(kw_values[0]);
+    if (kw_values[1] != Qundef) g.scale = NUM2DBL(kw_values[1]);
+    if (g.scale < 0) rb_raise(rb_eArgError, "scale must be a non-negative value");
+
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    ndfunc_t ndf = { klass == numo_cSFloat ? iter_normal<float> : iter_normal<double>, FULL_LOOP, 1, 0, ain, 0 };
+
+    na_ndloop3(&ndf, &g, 1, x);
+
+    return x;
   }
 };
 
