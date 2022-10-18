@@ -72,6 +72,7 @@ public:
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
     rb_define_method(rb_cPCG64, "normal", RUBY_METHOD_FUNC(_numo_random_pcg64_normal), -1);
+    rb_define_method(rb_cPCG64, "lognormal", RUBY_METHOD_FUNC(_numo_random_pcg64_lognormal), -1);
     return rb_cPCG64;
   }
 
@@ -171,6 +172,61 @@ private:
 
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     ndfunc_t ndf = { klass == numo_cSFloat ? iter_normal<float> : iter_normal<double>, FULL_LOOP, 1, 0, ain, 0 };
+
+    na_ndloop3(&ndf, &g, 1, x);
+
+    return x;
+  }
+
+  // #lognormal
+
+  typedef struct {
+    double mean;
+    double sigma;
+    pcg64* rnd;
+  } lognormal_opt_t;
+
+  template<typename T> static void iter_lognormal(na_loop_t* const lp) {
+    lognormal_opt_t* g = (lognormal_opt_t*)(lp->opt_ptr);
+    std::lognormal_distribution<T> lognormal_dist(g->mean, g->sigma);
+
+    size_t i;
+    char* p1;
+    ssize_t s1;
+    size_t* idx1;
+    INIT_COUNTER(lp, i);
+    INIT_PTR_IDX(lp, 0, p1, s1, idx1);
+
+    if (idx1) {
+      for (; i--;) {
+        SET_DATA_INDEX(p1, idx1, T, lognormal_dist(*(g->rnd)));
+      }
+    } else {
+      for (; i--;) {
+        SET_DATA_STRIDE(p1, s1, T, lognormal_dist(*(g->rnd)));
+      }
+    }
+  }
+
+  static VALUE _numo_random_pcg64_lognormal(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("mean"), rb_intern("sigma") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
+
+    VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    pcg64* ptr = get_pcg64(self);
+    lognormal_opt_t g = { 0.0, 1.0, ptr };
+    if (kw_values[0] != Qundef) g.mean = NUM2DBL(kw_values[0]);
+    if (kw_values[1] != Qundef) g.sigma = NUM2DBL(kw_values[1]);
+    if (g.sigma < 0) rb_raise(rb_eArgError, "sigma must be a non-negative value");
+
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    ndfunc_t ndf = { klass == numo_cSFloat ? iter_lognormal<float> : iter_lognormal<double>, FULL_LOOP, 1, 0, ain, 0 };
 
     na_ndloop3(&ndf, &g, 1, x);
 
