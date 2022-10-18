@@ -71,6 +71,7 @@ public:
     rb_define_method(rb_cPCG64, "seed=", RUBY_METHOD_FUNC(_numo_random_pcg64_set_seed), 1);
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
+    rb_define_method(rb_cPCG64, "chisquare", RUBY_METHOD_FUNC(_numo_random_pcg64_chisquare), -1);
     rb_define_method(rb_cPCG64, "normal", RUBY_METHOD_FUNC(_numo_random_pcg64_normal), -1);
     rb_define_method(rb_cPCG64, "lognormal", RUBY_METHOD_FUNC(_numo_random_pcg64_lognormal), -1);
     return rb_cPCG64;
@@ -121,6 +122,58 @@ private:
     pcg64* ptr = get_pcg64(self);
     const double x = uniform_dist(*ptr);
     return DBL2NUM(x);
+  }
+
+  // #chisqure
+
+  typedef struct {
+    double df;
+    pcg64* rnd;
+  } chisquare_opt_t;
+
+  template<typename T> static void iter_chisquare(na_loop_t* const lp) {
+    chisquare_opt_t* g = (chisquare_opt_t*)(lp->opt_ptr);
+    std::chi_squared_distribution<T> chisquare_dist(g->df);
+
+    size_t i;
+    char* p1;
+    ssize_t s1;
+    size_t* idx1;
+    INIT_COUNTER(lp, i);
+    INIT_PTR_IDX(lp, 0, p1, s1, idx1);
+
+    if (idx1) {
+      for (; i--;) {
+        SET_DATA_INDEX(p1, idx1, T, chisquare_dist(*(g->rnd)));
+      }
+    } else {
+      for (; i--;) {
+        SET_DATA_STRIDE(p1, s1, T, chisquare_dist(*(g->rnd)));
+      }
+    }
+  }
+
+  static VALUE _numo_random_pcg64_chisquare(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[1] = { rb_intern("df") };
+    VALUE kw_values[1] = { Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 1, 0, kw_values);
+
+    VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    pcg64* ptr = get_pcg64(self);
+    chisquare_opt_t g = { NUM2DBL(kw_values[0]), ptr };
+    if (g.df <= 0) rb_raise(rb_eArgError, "df must be > 0");
+
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    ndfunc_t ndf = { klass == numo_cSFloat ? iter_chisquare<float> : iter_chisquare<double>, FULL_LOOP, 1, 0, ain, 0 };
+
+    na_ndloop3(&ndf, &g, 1, x);
+
+    return x;
   }
 
   // #normal
