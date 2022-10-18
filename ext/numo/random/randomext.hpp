@@ -78,6 +78,8 @@ public:
 private:
   static const rb_data_type_t pcg64_type;
 
+  // #initialize
+
   static VALUE _numo_random_pcg64_init(int argc, VALUE* argv, VALUE self) {
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("seed") };
@@ -97,15 +99,21 @@ private:
     return Qnil;
   }
 
+  // #seed=
+
   static VALUE _numo_random_pcg64_set_seed(VALUE self, VALUE seed) {
     get_pcg64(self)->seed(NUM2LONG(seed));
     rb_iv_set(self, "seed", seed);
     return Qnil;
   }
 
+  // #seed
+
   static VALUE _numo_random_pcg64_get_seed(VALUE self) {
     return rb_iv_get(self, "seed");
   }
+
+  // #random
 
   static VALUE _numo_random_pcg64_random(VALUE self) {
     std::uniform_real_distribution<double> uniform_dist(0, 1);
@@ -113,6 +121,8 @@ private:
     const double x = uniform_dist(*ptr);
     return DBL2NUM(x);
   }
+
+  // #normal
 
   typedef struct {
     double loc;
