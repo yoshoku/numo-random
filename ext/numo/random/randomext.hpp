@@ -38,6 +38,8 @@
 
 #include <iostream>
 #include <random>
+#include <type_traits>
+#include <typeinfo>
 
 #include <pcg_random.hpp>
 
@@ -125,17 +127,15 @@ private:
     return DBL2NUM(x);
   }
 
-  // #cauchy
+  // -- common subroutine --
 
-  typedef struct {
-    double loc;
-    double scale;
+  template<class D> struct rand_opt_t {
+    D dist;
     pcg64* rnd;
-  } cauchy_opt_t;
+  };
 
-  template<typename T> static void iter_cauchy(na_loop_t* const lp) {
-    cauchy_opt_t* g = (cauchy_opt_t*)(lp->opt_ptr);
-    std::cauchy_distribution<T> cauchy_dist(g->loc, g->scale);
+  template<class D, typename T> static void _iter_rand(na_loop_t* const lp) {
+    rand_opt_t<D>* opt = (rand_opt_t<D>*)(lp->opt_ptr);
 
     size_t i;
     char* p1;
@@ -146,13 +146,25 @@ private:
 
     if (idx1) {
       for (; i--;) {
-        SET_DATA_INDEX(p1, idx1, T, cauchy_dist(*(g->rnd)));
+        SET_DATA_INDEX(p1, idx1, T, opt->dist(*(opt->rnd)));
       }
     } else {
       for (; i--;) {
-        SET_DATA_STRIDE(p1, s1, T, cauchy_dist(*(g->rnd)));
+        SET_DATA_STRIDE(p1, s1, T, opt->dist(*(opt->rnd)));
       }
     }
+  }
+
+  // #cauchy
+
+  template<typename T> static VALUE _rand_cauchy(VALUE& self, VALUE& x, const double& loc, const double& scale) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::cauchy_distribution<T> cauchy_dist(loc, scale);
+    ndfunc_t ndf = { _iter_rand<std::cauchy_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::cauchy_distribution<T>> opt = { cauchy_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+    return x;
   }
 
   static VALUE _numo_random_pcg64_cauchy(int argc, VALUE* argv, VALUE self) {
@@ -163,50 +175,26 @@ private:
     rb_scan_args(argc, argv, "1:", &x, &kw_args);
     rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
 
-    VALUE klass = rb_obj_class(x);
+    const VALUE klass = rb_obj_class(x);
     if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
 
-    pcg64* ptr = get_pcg64(self);
-    cauchy_opt_t g = { 0.0, 1.0, ptr };
-    if (kw_values[0] != Qundef) g.loc = NUM2DBL(kw_values[0]);
-    if (kw_values[1] != Qundef) g.scale = NUM2DBL(kw_values[1]);
-    if (g.scale < 0) rb_raise(rb_eArgError, "scale must be a non-negative value");
+    const double loc = kw_values[0] == Qundef ? 0.0 : NUM2DBL(kw_values[0]);
+    const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
+    if (scale < 0) rb_raise(rb_eArgError, "scale must be a non-negative value");
 
-    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
-    ndfunc_t ndf = { klass == numo_cSFloat ? iter_cauchy<float> : iter_cauchy<double>, FULL_LOOP, 1, 0, ain, 0 };
-
-    na_ndloop3(&ndf, &g, 1, x);
-
-    return x;
+    return klass == numo_cSFloat ? _rand_cauchy<float>(self, x, loc, scale) : _rand_cauchy<double>(self, x, loc, scale);
   }
 
   // #chisqure
 
-  typedef struct {
-    double df;
-    pcg64* rnd;
-  } chisquare_opt_t;
-
-  template<typename T> static void iter_chisquare(na_loop_t* const lp) {
-    chisquare_opt_t* g = (chisquare_opt_t*)(lp->opt_ptr);
-    std::chi_squared_distribution<T> chisquare_dist(g->df);
-
-    size_t i;
-    char* p1;
-    ssize_t s1;
-    size_t* idx1;
-    INIT_COUNTER(lp, i);
-    INIT_PTR_IDX(lp, 0, p1, s1, idx1);
-
-    if (idx1) {
-      for (; i--;) {
-        SET_DATA_INDEX(p1, idx1, T, chisquare_dist(*(g->rnd)));
-      }
-    } else {
-      for (; i--;) {
-        SET_DATA_STRIDE(p1, s1, T, chisquare_dist(*(g->rnd)));
-      }
-    }
+  template<typename T> static VALUE _rand_chisquare(VALUE& self, VALUE& x, const double& df) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::chi_squared_distribution<T> chisquare_dist(df);
+    ndfunc_t ndf = { _iter_rand<std::chi_squared_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::chi_squared_distribution<T>> opt = { chisquare_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+    return x;
   }
 
   static VALUE _numo_random_pcg64_chisquare(int argc, VALUE* argv, VALUE self) {
@@ -217,49 +205,25 @@ private:
     rb_scan_args(argc, argv, "1:", &x, &kw_args);
     rb_get_kwargs(kw_args, kw_table, 1, 0, kw_values);
 
-    VALUE klass = rb_obj_class(x);
+    const VALUE klass = rb_obj_class(x);
     if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
 
-    pcg64* ptr = get_pcg64(self);
-    chisquare_opt_t g = { NUM2DBL(kw_values[0]), ptr };
-    if (g.df <= 0) rb_raise(rb_eArgError, "df must be > 0");
+    const double df = NUM2DBL(kw_values[0]);
+    if (df <= 0) rb_raise(rb_eArgError, "df must be > 0");
 
-    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
-    ndfunc_t ndf = { klass == numo_cSFloat ? iter_chisquare<float> : iter_chisquare<double>, FULL_LOOP, 1, 0, ain, 0 };
-
-    na_ndloop3(&ndf, &g, 1, x);
-
-    return x;
+    return klass == numo_cSFloat ? _rand_chisquare<float>(self, x, df) : _rand_chisquare<double>(self, x, df);
   }
 
   // #normal
 
-  typedef struct {
-    double loc;
-    double scale;
-    pcg64* rnd;
-  } normal_opt_t;
-
-  template<typename T> static void iter_normal(na_loop_t* const lp) {
-    normal_opt_t* g = (normal_opt_t*)(lp->opt_ptr);
-    std::normal_distribution<T> normal_dist(g->loc, g->scale);
-
-    size_t i;
-    char* p1;
-    ssize_t s1;
-    size_t* idx1;
-    INIT_COUNTER(lp, i);
-    INIT_PTR_IDX(lp, 0, p1, s1, idx1);
-
-    if (idx1) {
-      for (; i--;) {
-        SET_DATA_INDEX(p1, idx1, T, normal_dist(*(g->rnd)));
-      }
-    } else {
-      for (; i--;) {
-        SET_DATA_STRIDE(p1, s1, T, normal_dist(*(g->rnd)));
-      }
-    }
+  template<typename T> static VALUE _rand_normal(VALUE& self, VALUE& x, const double& loc, const double& scale) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::normal_distribution<T> normal_dist(loc, scale);
+    ndfunc_t ndf = { _iter_rand<std::normal_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::normal_distribution<T>> opt = { normal_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+    return x;
   }
 
   static VALUE _numo_random_pcg64_normal(int argc, VALUE* argv, VALUE self) {
@@ -273,48 +237,23 @@ private:
     VALUE klass = rb_obj_class(x);
     if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
 
-    pcg64* ptr = get_pcg64(self);
-    normal_opt_t g = { 0.0, 1.0, ptr };
-    if (kw_values[0] != Qundef) g.loc = NUM2DBL(kw_values[0]);
-    if (kw_values[1] != Qundef) g.scale = NUM2DBL(kw_values[1]);
-    if (g.scale < 0) rb_raise(rb_eArgError, "scale must be a non-negative value");
+    const double loc = kw_values[0] == Qundef ? 0.0 : NUM2DBL(kw_values[0]);
+    const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
+    if (scale < 0) rb_raise(rb_eArgError, "scale must be a non-negative value");
 
-    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
-    ndfunc_t ndf = { klass == numo_cSFloat ? iter_normal<float> : iter_normal<double>, FULL_LOOP, 1, 0, ain, 0 };
-
-    na_ndloop3(&ndf, &g, 1, x);
-
-    return x;
+    return klass == numo_cSFloat ? _rand_normal<float>(self, x, loc, scale) : _rand_normal<double>(self, x, loc, scale);
   }
 
   // #lognormal
 
-  typedef struct {
-    double mean;
-    double sigma;
-    pcg64* rnd;
-  } lognormal_opt_t;
-
-  template<typename T> static void iter_lognormal(na_loop_t* const lp) {
-    lognormal_opt_t* g = (lognormal_opt_t*)(lp->opt_ptr);
-    std::lognormal_distribution<T> lognormal_dist(g->mean, g->sigma);
-
-    size_t i;
-    char* p1;
-    ssize_t s1;
-    size_t* idx1;
-    INIT_COUNTER(lp, i);
-    INIT_PTR_IDX(lp, 0, p1, s1, idx1);
-
-    if (idx1) {
-      for (; i--;) {
-        SET_DATA_INDEX(p1, idx1, T, lognormal_dist(*(g->rnd)));
-      }
-    } else {
-      for (; i--;) {
-        SET_DATA_STRIDE(p1, s1, T, lognormal_dist(*(g->rnd)));
-      }
-    }
+  template<typename T> static VALUE _rand_lognormal(VALUE& self, VALUE& x, const double& mean, const double& sigma) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::lognormal_distribution<T> lognormal_dist(mean, sigma);
+    ndfunc_t ndf = { _iter_rand<std::lognormal_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::lognormal_distribution<T>> opt = { lognormal_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+    return x;
   }
 
   static VALUE _numo_random_pcg64_lognormal(int argc, VALUE* argv, VALUE self) {
@@ -325,21 +264,14 @@ private:
     rb_scan_args(argc, argv, "1:", &x, &kw_args);
     rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
 
-    VALUE klass = rb_obj_class(x);
+    const VALUE klass = rb_obj_class(x);
     if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
 
-    pcg64* ptr = get_pcg64(self);
-    lognormal_opt_t g = { 0.0, 1.0, ptr };
-    if (kw_values[0] != Qundef) g.mean = NUM2DBL(kw_values[0]);
-    if (kw_values[1] != Qundef) g.sigma = NUM2DBL(kw_values[1]);
-    if (g.sigma < 0) rb_raise(rb_eArgError, "sigma must be a non-negative value");
+    const double mean = kw_values[0] == Qundef ? 0.0 : NUM2DBL(kw_values[0]);
+    const double sigma = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
+    if (sigma < 0) rb_raise(rb_eArgError, "sigma must be a non-negative value");
 
-    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
-    ndfunc_t ndf = { klass == numo_cSFloat ? iter_lognormal<float> : iter_lognormal<double>, FULL_LOOP, 1, 0, ain, 0 };
-
-    na_ndloop3(&ndf, &g, 1, x);
-
-    return x;
+    return klass == numo_cSFloat ? _rand_lognormal<float>(self, x, mean, sigma) : _rand_lognormal<double>(self, x, mean, sigma);
   }
 };
 
