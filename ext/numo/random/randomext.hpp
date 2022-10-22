@@ -24,10 +24,7 @@
 #include <numo/narray.h>
 #include <numo/template.h>
 
-#include <iostream>
 #include <random>
-#include <type_traits>
-#include <typeinfo>
 
 #include <pcg_random.hpp>
 
