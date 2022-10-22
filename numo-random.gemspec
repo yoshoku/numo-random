@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'Write a short summary, because RubyGems requires one.'
   spec.description = 'Write a longer description or delete this line.'
   spec.homepage = 'https://github.com/yoshoku/numo-random'
-  spec.license = 'BSD-3-Clause'
+  spec.license = 'Apache-2.0'
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage

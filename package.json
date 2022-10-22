@@ -2,7 +2,7 @@
   "name": "numo-random",
   "repository": "git@github.com:yoshoku/numo-random.git",
   "author": "Atsushi Tatsuma <yoshoku@outlook.com>",
-  "license": "BSD-3-Clause",
+  "license": "Apache-2.0",
   "private": true,
   "scripts": {
     "prepare": "husky install"
