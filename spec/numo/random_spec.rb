@@ -3,18 +3,18 @@
 RSpec.describe Numo::Random do
   subject(:rng) { Numo::Random::PCG64.new(seed: 42) }
 
-  it 'has a version number' do
-    expect(Numo::Random::VERSION).not_to be_nil
+  describe '#seed= and #seed' do
+    it 'sets and gets random seed', :aggregate_failures do
+      expect(rng.seed).to eq(42)
+      rng.seed = 100
+      expect(rng.seed).to eq(100)
+    end
   end
 
-  it 'sets and gets random seed', :aggregate_failures do
-    expect(rng.seed).to eq(42)
-    rng.seed = 100
-    expect(rng.seed).to eq(100)
-  end
-
-  it 'gets random number' do
-    expect(rng.random).not_to be_nil
+  describe '#random' do
+    it 'gets random number' do
+      expect(rng.random).not_to be_nil
+    end
   end
 
   describe '#uniform' do
@@ -182,7 +182,7 @@ RSpec.describe Numo::Random do
       let(:x) { Numo::SFloat.new(500, 600) }
       let(:y) { rng.f(x, dfnum: 5, dfden: 10) }
 
-      it 'obtains random numbers form a F-istribution', :aggregate_failures do
+      it 'obtains random numbers form a F-distribution', :aggregate_failures do
         expect(y).to be_a(Numo::SFloat)
         expect(y.shape).to match(x.shape)
         expect(y.mean).to be_within(1e-2).of(1.25)
