@@ -78,6 +78,7 @@ public:
     rb_define_method(rb_cPCG64, "f", RUBY_METHOD_FUNC(_numo_random_pcg64_f), -1);
     rb_define_method(rb_cPCG64, "normal", RUBY_METHOD_FUNC(_numo_random_pcg64_normal), -1);
     rb_define_method(rb_cPCG64, "lognormal", RUBY_METHOD_FUNC(_numo_random_pcg64_lognormal), -1);
+    rb_define_method(rb_cPCG64, "standard_t", RUBY_METHOD_FUNC(_numo_random_pcg64_standard_t), -1);
     return rb_cPCG64;
   }
 
@@ -304,6 +305,35 @@ private:
     if (sigma < 0) rb_raise(rb_eArgError, "sigma must be a non-negative value");
 
     return klass == numo_cSFloat ? _rand_lognormal<float>(self, x, mean, sigma) : _rand_lognormal<double>(self, x, mean, sigma);
+  }
+
+  // #standard_t
+
+  template<typename T> static VALUE _rand_t(VALUE& self, VALUE& x, const double& df) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::student_t_distribution<T> t_dist(df);
+    ndfunc_t ndf = { _iter_rand<std::student_t_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::student_t_distribution<T>> opt = { t_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+    return x;
+  }
+
+  static VALUE _numo_random_pcg64_standard_t(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[1] = { rb_intern("df") };
+    VALUE kw_values[1] = { Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 1, 0, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    const double df = NUM2DBL(kw_values[0]);
+    if (df <= 0) rb_raise(rb_eArgError, "df must be > 0");
+
+    return klass == numo_cSFloat ? _rand_t<float>(self, x, df) : _rand_t<double>(self, x, df);
   }
 };
 

@@ -294,4 +294,56 @@ RSpec.describe Numo::Random do
       end
     end
   end
+
+  describe '#standard_t' do
+    context 'when array type is DFloat' do
+      let(:x) { Numo::DFloat.new(500, 600) }
+      let(:y) { rng.standard_t(x, df: 10) }
+
+      it "obtains random numbers form a Student's t-distribution", :aggregate_failures do
+        expect(y).to be_a(Numo::DFloat)
+        expect(y.shape).to match(x.shape)
+        expect(y.mean).to be_within(1e-2).of(0)
+        expect(y.var).to be_within(1e-2).of(1.25)
+      end
+    end
+
+    context 'when array type is SFloat' do
+      let(:x) { Numo::SFloat.new(500, 600) }
+      let(:y) { rng.standard_t(x, df: 10) }
+
+      it "obtains random numbers form a Student's t-distribution", :aggregate_failures do
+        expect(y).to be_a(Numo::SFloat)
+        expect(y.shape).to match(x.shape)
+        expect(y.mean).to be_within(1e-2).of(0)
+        expect(y.var).to be_within(1e-2).of(1.25)
+      end
+    end
+
+    context 'when negative value is given to df' do
+      let(:x) { Numo::DFloat.new(5, 2) }
+
+      it 'raises ArgumentError' do
+        expect { rng.standard_t(x, df: -1) }.to raise_error(ArgumentError, 'df must be > 0')
+      end
+    end
+
+    context 'when zero is given to df' do
+      let(:x) { Numo::DFloat.new(5, 2) }
+
+      it 'raises ArgumentError' do
+        expect { rng.standard_t(x, df: 0) }.to raise_error(ArgumentError, 'df must be > 0')
+      end
+    end
+
+    context 'when array type is Int32' do
+      let(:x) { Numo::Int32.new(5, 2) }
+
+      it 'raises TypeError' do
+        expect do
+          rng.standard_t(x, df: 1)
+        end.to raise_error(TypeError, 'invalid NArray class, it must be DFloat or SFloat')
+      end
+    end
+  end
 end
