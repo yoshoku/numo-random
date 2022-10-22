@@ -73,6 +73,7 @@ public:
     rb_define_method(rb_cPCG64, "seed=", RUBY_METHOD_FUNC(_numo_random_pcg64_set_seed), 1);
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
+    rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
     rb_define_method(rb_cPCG64, "cauchy", RUBY_METHOD_FUNC(_numo_random_pcg64_cauchy), -1);
     rb_define_method(rb_cPCG64, "chisquare", RUBY_METHOD_FUNC(_numo_random_pcg64_chisquare), -1);
     rb_define_method(rb_cPCG64, "f", RUBY_METHOD_FUNC(_numo_random_pcg64_f), -1);
@@ -155,6 +156,36 @@ private:
         SET_DATA_STRIDE(p1, s1, T, opt->dist(*(opt->rnd)));
       }
     }
+  }
+
+  // #uniform
+
+  template<typename T> static VALUE _rand_uniform(VALUE& self, VALUE& x, const double& low, const double& high) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::uniform_real_distribution<T> uniform_dist(low, high);
+    ndfunc_t ndf = { _iter_rand<std::uniform_real_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::uniform_real_distribution<T>> opt = { uniform_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+    return x;
+  }
+
+  static VALUE _numo_random_pcg64_uniform(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("low"), rb_intern("high") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
+
+    VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    const double low = kw_values[0] == Qundef ? 0.0 : NUM2DBL(kw_values[0]);
+    const double high = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
+    if (high - low < 0) rb_raise(rb_eArgError, "high - low must be > 0");
+
+    return klass == numo_cSFloat ? _rand_uniform<float>(self, x, low, high) : _rand_uniform<double>(self, x, low, high);
   }
 
   // #cauchy

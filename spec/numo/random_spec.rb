@@ -17,6 +17,48 @@ RSpec.describe Numo::Random do
     expect(rng.random).not_to be_nil
   end
 
+  describe '#uniform' do
+    context 'when array type is DFloat' do
+      let(:x) { Numo::DFloat.new(500, 600) }
+      let(:y) { rng.uniform(x, low: 1, high: 4) }
+
+      it 'obtains random numbers form a uniform distribution', :aggregate_failures do
+        expect(y).to be_a(Numo::DFloat)
+        expect(y.shape).to match(x.shape)
+        expect(y.mean).to be_within(1e-2).of(2.5)
+        expect(y.var).to be_within(1e-2).of(0.75)
+      end
+    end
+
+    context 'when array type is SFloat' do
+      let(:x) { Numo::SFloat.new(500, 600) }
+      let(:y) { rng.uniform(x, low: 1, high: 4) }
+
+      it 'obtains random numbers form a uniform distribution', :aggregate_failures do
+        expect(y).to be_a(Numo::SFloat)
+        expect(y.shape).to match(x.shape)
+        expect(y.mean).to be_within(1e-2).of(2.5)
+        expect(y.var).to be_within(1e-2).of(0.75)
+      end
+    end
+
+    context 'when high - low is negative value' do
+      let(:x) { Numo::DFloat.new(5, 2) }
+
+      it 'raises ArgumentError' do
+        expect { rng.uniform(x, low: 10, high: 5) }.to raise_error(ArgumentError, 'high - low must be > 0')
+      end
+    end
+
+    context 'when array type is Int32' do
+      let(:x) { Numo::Int32.new(5, 2) }
+
+      it 'raises TypeError' do
+        expect { rng.uniform(x) }.to raise_error(TypeError, 'invalid NArray class, it must be DFloat or SFloat')
+      end
+    end
+  end
+
   describe '#cauchy' do
     let(:mad) { (y - y.median).abs.median }
 
