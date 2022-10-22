@@ -123,6 +123,74 @@ RSpec.describe Numo::Random do
     end
   end
 
+  describe '#f' do
+    context 'when array type is DFloat' do
+      let(:x) { Numo::DFloat.new(500, 600) }
+      let(:y) { rng.f(x, dfnum: 5, dfden: 10) }
+
+      it 'obtains random numbers form a F-distribution', :aggregate_failures do
+        expect(y).to be_a(Numo::DFloat)
+        expect(y.shape).to match(x.shape)
+        expect(y.mean).to be_within(1e-2).of(1.25)
+        expect(y.var).to be_within(1e-1).of(1.354)
+      end
+    end
+
+    context 'when array type is SFloat' do
+      let(:x) { Numo::SFloat.new(500, 600) }
+      let(:y) { rng.f(x, dfnum: 5, dfden: 10) }
+
+      it 'obtains random numbers form a F-istribution', :aggregate_failures do
+        expect(y).to be_a(Numo::SFloat)
+        expect(y.shape).to match(x.shape)
+        expect(y.mean).to be_within(1e-2).of(1.25)
+        expect(y.var).to be_within(1e-1).of(1.354)
+      end
+    end
+
+    context 'when negative value is given to dfnum' do
+      let(:x) { Numo::DFloat.new(5, 2) }
+
+      it 'raises ArgumentError' do
+        expect { rng.f(x, dfnum: -5, dfden: 10) }.to raise_error(ArgumentError, 'dfnum must be > 0')
+      end
+    end
+
+    context 'when negative value is given to dfden' do
+      let(:x) { Numo::DFloat.new(5, 2) }
+
+      it 'raises ArgumentError' do
+        expect { rng.f(x, dfnum: 5, dfden: -10) }.to raise_error(ArgumentError, 'dfden must be > 0')
+      end
+    end
+
+    context 'when zero is given to dfnum' do
+      let(:x) { Numo::DFloat.new(5, 2) }
+
+      it 'raises ArgumentError' do
+        expect { rng.f(x, dfnum: 0, dfden: 10) }.to raise_error(ArgumentError, 'dfnum must be > 0')
+      end
+    end
+
+    context 'when zero is given to dfden' do
+      let(:x) { Numo::DFloat.new(5, 2) }
+
+      it 'raises ArgumentError' do
+        expect { rng.f(x, dfnum: 5, dfden: 0) }.to raise_error(ArgumentError, 'dfden must be > 0')
+      end
+    end
+
+    context 'when array type is Int32' do
+      let(:x) { Numo::Int32.new(5, 2) }
+
+      it 'raises TypeError' do
+        expect do
+          rng.f(x, dfnum: 5, dfden: 10)
+        end.to raise_error(TypeError, 'invalid NArray class, it must be DFloat or SFloat')
+      end
+    end
+  end
+
   describe '#normal' do
     context 'when array type is DFloat' do
       let(:x) { Numo::DFloat.new(500, 200) }

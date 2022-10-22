@@ -75,6 +75,7 @@ public:
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
     rb_define_method(rb_cPCG64, "cauchy", RUBY_METHOD_FUNC(_numo_random_pcg64_cauchy), -1);
     rb_define_method(rb_cPCG64, "chisquare", RUBY_METHOD_FUNC(_numo_random_pcg64_chisquare), -1);
+    rb_define_method(rb_cPCG64, "f", RUBY_METHOD_FUNC(_numo_random_pcg64_f), -1);
     rb_define_method(rb_cPCG64, "normal", RUBY_METHOD_FUNC(_numo_random_pcg64_normal), -1);
     rb_define_method(rb_cPCG64, "lognormal", RUBY_METHOD_FUNC(_numo_random_pcg64_lognormal), -1);
     return rb_cPCG64;
@@ -212,6 +213,37 @@ private:
     if (df <= 0) rb_raise(rb_eArgError, "df must be > 0");
 
     return klass == numo_cSFloat ? _rand_chisquare<float>(self, x, df) : _rand_chisquare<double>(self, x, df);
+  }
+
+  // #f
+
+  template<typename T> static VALUE _rand_f(VALUE& self, VALUE& x, const double& dfnum, const double& dfden) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::fisher_f_distribution<T> f_dist(dfnum, dfden);
+    ndfunc_t ndf = { _iter_rand<std::fisher_f_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::fisher_f_distribution<T>> opt = { f_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+    return x;
+  }
+
+  static VALUE _numo_random_pcg64_f(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("dfnum"), rb_intern("dfden") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 2, 0, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    const double dfnum = NUM2DBL(kw_values[0]);
+    const double dfden = NUM2DBL(kw_values[1]);
+    if (dfnum <= 0) rb_raise(rb_eArgError, "dfnum must be > 0");
+    if (dfden <= 0) rb_raise(rb_eArgError, "dfden must be > 0");
+
+    return klass == numo_cSFloat ? _rand_f<float>(self, x, dfnum, dfden) : _rand_f<double>(self, x, dfnum, dfden);
   }
 
   // #normal
