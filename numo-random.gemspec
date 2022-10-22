@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ['yoshoku']
   spec.email = ['yoshoku@outlook.com']
 
-  spec.summary = 'Write a short summary, because RubyGems requires one.'
-  spec.description = 'Write a longer description or delete this line.'
+  spec.summary = 'Numo::Random provides random number generation with several distributions for Numo::NArray.'
+  spec.description = 'Numo::Random provides random number generation with several distributions for Numo::NArray.'
   spec.homepage = 'https://github.com/yoshoku/numo-random'
   spec.license = 'Apache-2.0'
 
