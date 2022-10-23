@@ -80,7 +80,7 @@ private:
     rb_scan_args(argc, argv, ":", &kw_args);
     rb_get_kwargs(kw_args, kw_table, 0, 1, kw_values);
     pcg64* ptr = get_pcg64(self);
-    if (kw_values[0] == Qundef) {
+    if (kw_values[0] == Qundef || NIL_P(kw_values[0])) {
       std::random_device rd;
       const unsigned int seed = rd();
       new (ptr) pcg64(seed);
