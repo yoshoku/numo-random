@@ -20,7 +20,33 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+An example of generating random numbers according to the standard normal distribution:
+
+```ruby
+require 'numo/narray'
+require 'numo/gnuplot'
+
+require 'numo/random'
+
+# Prepareing array to be filled with random numbers.
+x = Numo::DFloat.new(5000, 2)
+
+# Creating random number generator.
+rng = Numo::Random::Generator.new(seed: 42)
+
+# Generating random numbers with a normal distribution.
+rng.normal(x, loc: 0.0, scale: 1.0)
+
+# Plotting the generated result.
+Numo.gnuplot do
+  set(terminal: 'png')
+  set(output: 'normal2d.png')
+  plot(x[true, 0], x[true, 1])
+end
+```
+
+![normal2d.png](https://user-images.githubusercontent.com/5562409/197376738-ee8d2b12-1902-4a12-bcf3-757461f2f2db.png)
+
 
 ## Contributing
 
