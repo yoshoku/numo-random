@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Numo::Random do
-  subject(:rng) { Numo::Random::PCG64.new(seed: 42) }
+RSpec.describe Numo::Random::PCG64 do
+  subject(:rng) { described_class.new(seed: 42) }
 
   describe '#seed= and #seed' do
     it 'sets and gets random seed', :aggregate_failures do
