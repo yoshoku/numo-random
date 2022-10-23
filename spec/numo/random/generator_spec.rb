@@ -19,26 +19,22 @@ RSpec.describe Numo::Random::Generator do
 
   describe '#uniform' do
     context 'when array type is DFloat' do
-      let(:x) { Numo::DFloat.new(500, 600) }
-      let(:y) { rng.uniform(x, low: 1, high: 4) }
+      let(:x) { Numo::DFloat.new(500, 600).tap { |x| rng.uniform(x, low: 1, high: 4) } }
 
       it 'obtains random numbers form a uniform distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::DFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(2.5)
-        expect(y.var).to be_within(1e-2).of(0.75)
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(2.5)
+        expect(x.var).to be_within(1e-2).of(0.75)
       end
     end
 
     context 'when array type is SFloat' do
-      let(:x) { Numo::SFloat.new(500, 600) }
-      let(:y) { rng.uniform(x, low: 1, high: 4) }
+      let(:x) { Numo::SFloat.new(500, 600).tap { |x| rng.uniform(x, low: 1, high: 4) } }
 
       it 'obtains random numbers form a uniform distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::SFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(2.5)
-        expect(y.var).to be_within(1e-2).of(0.75)
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(2.5)
+        expect(x.var).to be_within(1e-2).of(0.75)
       end
     end
 
@@ -60,38 +56,33 @@ RSpec.describe Numo::Random::Generator do
   end
 
   describe '#cauchy' do
-    let(:mad) { (y - y.median).abs.median }
+    let(:mad) { (x - x.median).abs.median }
 
     context 'when array type is DFloat' do
-      let(:x) { Numo::DFloat.new(500, 200) }
-      let(:y) { rng.cauchy(x) }
+      let(:x) { Numo::DFloat.new(500, 200).tap { |x| rng.cauchy(x) } }
 
       it 'obtains random numbers form a cauchy distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::DFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.median).to be_within(1e-2).of(0)
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.median).to be_within(1e-2).of(0)
         expect(mad).to be_within(1e-2).of(1)
       end
     end
 
     context 'when array type is SFloat' do
-      let(:x) { Numo::SFloat.new(500, 200) }
-      let(:y) { rng.cauchy(x) }
+      let(:x) { Numo::SFloat.new(500, 200).tap { |x| rng.cauchy(x) } }
 
       it 'obtains random numbers form a normal distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::SFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.median).to be_within(1e-2).of(0)
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.median).to be_within(1e-2).of(0)
         expect(mad).to be_within(1e-2).of(1)
       end
     end
 
     context 'when loc and scale parameters are given' do
-      let(:x) { Numo::DFloat.new(500, 200) }
-      let(:y) { rng.cauchy(x, loc: 4, scale: 2) }
+      let(:x) { Numo::DFloat.new(500, 200).tap { |x| rng.cauchy(x, loc: 4, scale: 2) } }
 
       it 'obtains random numbers form a normal distribution along with given parameters', :aggregate_failures do
-        expect(y.median).to be_within(1e-2).of(4)
+        expect(x.median).to be_within(1e-2).of(4)
         expect(mad).to be_within(1e-2).of(2)
       end
     end
@@ -115,26 +106,22 @@ RSpec.describe Numo::Random::Generator do
 
   describe '#chisquare' do
     context 'when array type is DFloat' do
-      let(:x) { Numo::DFloat.new(500, 600) }
-      let(:y) { rng.chisquare(x, df: 2) }
+      let(:x) { Numo::DFloat.new(500, 600).tap { |x| rng.chisquare(x, df: 2) } }
 
       it 'obtains random numbers form a chi-squared distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::DFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(2)
-        expect(y.var).to be_within(1e-1).of(4)
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(2)
+        expect(x.var).to be_within(1e-1).of(4)
       end
     end
 
     context 'when array type is SFloat' do
-      let(:x) { Numo::SFloat.new(500, 600) }
-      let(:y) { rng.chisquare(x, df: 2) }
+      let(:x) { Numo::SFloat.new(500, 600).tap { |x| rng.chisquare(x, df: 2) } }
 
       it 'obtains random numbers form a chi-squared distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::SFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(2)
-        expect(y.var).to be_within(1e-1).of(4)
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(2)
+        expect(x.var).to be_within(1e-1).of(4)
       end
     end
 
@@ -167,26 +154,22 @@ RSpec.describe Numo::Random::Generator do
 
   describe '#f' do
     context 'when array type is DFloat' do
-      let(:x) { Numo::DFloat.new(500, 600) }
-      let(:y) { rng.f(x, dfnum: 5, dfden: 10) }
+      let(:x) { Numo::DFloat.new(500, 600).tap { |x| rng.f(x, dfnum: 5, dfden: 10) } }
 
       it 'obtains random numbers form a F-distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::DFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(1.25)
-        expect(y.var).to be_within(1e-1).of(1.354)
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(1.25)
+        expect(x.var).to be_within(1e-1).of(1.354)
       end
     end
 
     context 'when array type is SFloat' do
-      let(:x) { Numo::SFloat.new(500, 600) }
-      let(:y) { rng.f(x, dfnum: 5, dfden: 10) }
+      let(:x) { Numo::SFloat.new(500, 600).tap { |x| rng.f(x, dfnum: 5, dfden: 10) } }
 
       it 'obtains random numbers form a F-distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::SFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(1.25)
-        expect(y.var).to be_within(1e-1).of(1.354)
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(1.25)
+        expect(x.var).to be_within(1e-1).of(1.354)
       end
     end
 
@@ -235,36 +218,31 @@ RSpec.describe Numo::Random::Generator do
 
   describe '#normal' do
     context 'when array type is DFloat' do
-      let(:x) { Numo::DFloat.new(500, 200) }
-      let(:y) { rng.normal(x) }
+      let(:x) { Numo::DFloat.new(500, 200).tap { |x| rng.normal(x) } }
 
       it 'obtains random numbers form a normal distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::DFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(0)
-        expect(y.stddev).to be_within(1e-2).of(1)
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(0)
+        expect(x.stddev).to be_within(1e-2).of(1)
       end
     end
 
     context 'when array type is SFloat' do
-      let(:x) { Numo::SFloat.new(500, 200) }
-      let(:y) { rng.normal(x) }
+      let(:x) { Numo::SFloat.new(500, 200).tap { |x| rng.normal(x) } }
 
       it 'obtains random numbers form a normal distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::SFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(0)
-        expect(y.stddev).to be_within(1e-2).of(1)
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(0)
+        expect(x.stddev).to be_within(1e-2).of(1)
       end
     end
 
     context 'when loc and scale parameters are given' do
-      let(:x) { Numo::DFloat.new(500, 200) }
-      let(:y) { rng.normal(x, loc: 10, scale: 2) }
+      let(:x) { Numo::DFloat.new(500, 200).tap { |x| rng.normal(x, loc: 10, scale: 2) } }
 
       it 'obtains random numbers form a normal distribution along with given parameters', :aggregate_failures do
-        expect(y.mean).to be_within(1e-2).of(10)
-        expect(y.stddev).to be_within(1e-2).of(2)
+        expect(x.mean).to be_within(1e-2).of(10)
+        expect(x.stddev).to be_within(1e-2).of(2)
       end
     end
 
@@ -287,36 +265,31 @@ RSpec.describe Numo::Random::Generator do
 
   describe '#lognormal' do
     context 'when array type is DFloat' do
-      let(:x) { Numo::DFloat.new(500, 600) }
-      let(:y) { rng.lognormal(x) }
+      let(:x) { Numo::DFloat.new(500, 600).tap { |x| rng.lognormal(x) } }
 
       it 'obtains random numbers form a lognormal distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::DFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(Math.exp(0.5))
-        expect(y.var).to be_within(1e-1).of(Math.exp(2) - Math.exp(1))
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(Math.exp(0.5))
+        expect(x.var).to be_within(1e-1).of(Math.exp(2) - Math.exp(1))
       end
     end
 
     context 'when array type is SFloat' do
-      let(:x) { Numo::SFloat.new(500, 600) }
-      let(:y) { rng.lognormal(x) }
+      let(:x) { Numo::SFloat.new(500, 600).tap { |x| rng.lognormal(x) } }
 
       it 'obtains random numbers form a lognormal distribution', :aggregate_failures do
-        expect(y).to be_a(Numo::SFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(Math.exp(0.5))
-        expect(y.var).to be_within(1e-1).of(Math.exp(2) - Math.exp(1))
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(Math.exp(0.5))
+        expect(x.var).to be_within(1e-1).of(Math.exp(2) - Math.exp(1))
       end
     end
 
     context 'when loc and scale parameters are given' do
-      let(:x) { Numo::DFloat.new(500, 800) }
-      let(:y) { rng.lognormal(x, mean: 0.5, sigma: 1) }
+      let(:x) { Numo::DFloat.new(500, 800).tap { |x| rng.lognormal(x, mean: 0.5, sigma: 1) } }
 
       it 'obtains random numbers form a lognormal distribution along with given parameters', :aggregate_failures do
-        expect(y.mean).to be_within(1e-2).of(Math.exp(1))
-        expect(y.var).to be_within(1e-1).of(Math.exp(3) - Math.exp(2))
+        expect(x.mean).to be_within(1e-2).of(Math.exp(1))
+        expect(x.var).to be_within(1e-1).of(Math.exp(3) - Math.exp(2))
       end
     end
 
@@ -339,26 +312,22 @@ RSpec.describe Numo::Random::Generator do
 
   describe '#standard_t' do
     context 'when array type is DFloat' do
-      let(:x) { Numo::DFloat.new(500, 600) }
-      let(:y) { rng.standard_t(x, df: 10) }
+      let(:x) { Numo::DFloat.new(500, 600).tap { |x| rng.standard_t(x, df: 10) } }
 
       it "obtains random numbers form a Student's t-distribution", :aggregate_failures do
-        expect(y).to be_a(Numo::DFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(0)
-        expect(y.var).to be_within(1e-2).of(1.25)
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(0)
+        expect(x.var).to be_within(1e-2).of(1.25)
       end
     end
 
     context 'when array type is SFloat' do
-      let(:x) { Numo::SFloat.new(500, 600) }
-      let(:y) { rng.standard_t(x, df: 10) }
+      let(:x) { Numo::SFloat.new(500, 600).tap { |x| rng.standard_t(x, df: 10) } }
 
       it "obtains random numbers form a Student's t-distribution", :aggregate_failures do
-        expect(y).to be_a(Numo::SFloat)
-        expect(y.shape).to match(x.shape)
-        expect(y.mean).to be_within(1e-2).of(0)
-        expect(y.var).to be_within(1e-2).of(1.25)
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(0)
+        expect(x.var).to be_within(1e-2).of(1.25)
       end
     end
 

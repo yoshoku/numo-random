@@ -145,14 +145,13 @@ private:
 
   // #uniform
 
-  template<typename T> static VALUE _rand_uniform(VALUE& self, VALUE& x, const double& low, const double& high) {
+  template<typename T> static void _rand_uniform(VALUE& self, VALUE& x, const double& low, const double& high) {
     pcg64* ptr = get_pcg64(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::uniform_real_distribution<T> uniform_dist(low, high);
     ndfunc_t ndf = { _iter_rand<std::uniform_real_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
     rand_opt_t<std::uniform_real_distribution<T>> opt = { uniform_dist, ptr };
     na_ndloop3(&ndf, &opt, 1, x);
-    return x;
   }
 
   static VALUE _numo_random_pcg64_uniform(int argc, VALUE* argv, VALUE self) {
@@ -170,19 +169,25 @@ private:
     const double high = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
     if (high - low < 0) rb_raise(rb_eArgError, "high - low must be > 0");
 
-    return klass == numo_cSFloat ? _rand_uniform<float>(self, x, low, high) : _rand_uniform<double>(self, x, low, high);
+    if (klass == numo_cSFloat) {
+      _rand_uniform<float>(self, x, low, high);
+    } else {
+      _rand_uniform<double>(self, x, low, high);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #cauchy
 
-  template<typename T> static VALUE _rand_cauchy(VALUE& self, VALUE& x, const double& loc, const double& scale) {
+  template<typename T> static void _rand_cauchy(VALUE& self, VALUE& x, const double& loc, const double& scale) {
     pcg64* ptr = get_pcg64(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::cauchy_distribution<T> cauchy_dist(loc, scale);
     ndfunc_t ndf = { _iter_rand<std::cauchy_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
     rand_opt_t<std::cauchy_distribution<T>> opt = { cauchy_dist, ptr };
     na_ndloop3(&ndf, &opt, 1, x);
-    return x;
   }
 
   static VALUE _numo_random_pcg64_cauchy(int argc, VALUE* argv, VALUE self) {
@@ -200,19 +205,25 @@ private:
     const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
     if (scale < 0) rb_raise(rb_eArgError, "scale must be a non-negative value");
 
-    return klass == numo_cSFloat ? _rand_cauchy<float>(self, x, loc, scale) : _rand_cauchy<double>(self, x, loc, scale);
+    if (klass == numo_cSFloat) {
+      _rand_cauchy<float>(self, x, loc, scale);
+    } else {
+      _rand_cauchy<double>(self, x, loc, scale);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #chisqure
 
-  template<typename T> static VALUE _rand_chisquare(VALUE& self, VALUE& x, const double& df) {
+  template<typename T> static void _rand_chisquare(VALUE& self, VALUE& x, const double& df) {
     pcg64* ptr = get_pcg64(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::chi_squared_distribution<T> chisquare_dist(df);
     ndfunc_t ndf = { _iter_rand<std::chi_squared_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
     rand_opt_t<std::chi_squared_distribution<T>> opt = { chisquare_dist, ptr };
     na_ndloop3(&ndf, &opt, 1, x);
-    return x;
   }
 
   static VALUE _numo_random_pcg64_chisquare(int argc, VALUE* argv, VALUE self) {
@@ -229,19 +240,25 @@ private:
     const double df = NUM2DBL(kw_values[0]);
     if (df <= 0) rb_raise(rb_eArgError, "df must be > 0");
 
-    return klass == numo_cSFloat ? _rand_chisquare<float>(self, x, df) : _rand_chisquare<double>(self, x, df);
+    if (klass == numo_cSFloat) {
+      _rand_chisquare<float>(self, x, df);
+    } else {
+      _rand_chisquare<double>(self, x, df);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #f
 
-  template<typename T> static VALUE _rand_f(VALUE& self, VALUE& x, const double& dfnum, const double& dfden) {
+  template<typename T> static void _rand_f(VALUE& self, VALUE& x, const double& dfnum, const double& dfden) {
     pcg64* ptr = get_pcg64(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::fisher_f_distribution<T> f_dist(dfnum, dfden);
     ndfunc_t ndf = { _iter_rand<std::fisher_f_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
     rand_opt_t<std::fisher_f_distribution<T>> opt = { f_dist, ptr };
     na_ndloop3(&ndf, &opt, 1, x);
-    return x;
   }
 
   static VALUE _numo_random_pcg64_f(int argc, VALUE* argv, VALUE self) {
@@ -260,19 +277,25 @@ private:
     if (dfnum <= 0) rb_raise(rb_eArgError, "dfnum must be > 0");
     if (dfden <= 0) rb_raise(rb_eArgError, "dfden must be > 0");
 
-    return klass == numo_cSFloat ? _rand_f<float>(self, x, dfnum, dfden) : _rand_f<double>(self, x, dfnum, dfden);
+    if (klass == numo_cSFloat) {
+      _rand_f<float>(self, x, dfnum, dfden);
+    } else {
+      _rand_f<double>(self, x, dfnum, dfden);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #normal
 
-  template<typename T> static VALUE _rand_normal(VALUE& self, VALUE& x, const double& loc, const double& scale) {
+  template<typename T> static void _rand_normal(VALUE& self, VALUE& x, const double& loc, const double& scale) {
     pcg64* ptr = get_pcg64(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::normal_distribution<T> normal_dist(loc, scale);
     ndfunc_t ndf = { _iter_rand<std::normal_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
     rand_opt_t<std::normal_distribution<T>> opt = { normal_dist, ptr };
     na_ndloop3(&ndf, &opt, 1, x);
-    return x;
   }
 
   static VALUE _numo_random_pcg64_normal(int argc, VALUE* argv, VALUE self) {
@@ -290,19 +313,25 @@ private:
     const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
     if (scale < 0) rb_raise(rb_eArgError, "scale must be a non-negative value");
 
-    return klass == numo_cSFloat ? _rand_normal<float>(self, x, loc, scale) : _rand_normal<double>(self, x, loc, scale);
+    if (klass == numo_cSFloat) {
+      _rand_normal<float>(self, x, loc, scale);
+    } else {
+      _rand_normal<double>(self, x, loc, scale);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #lognormal
 
-  template<typename T> static VALUE _rand_lognormal(VALUE& self, VALUE& x, const double& mean, const double& sigma) {
+  template<typename T> static void _rand_lognormal(VALUE& self, VALUE& x, const double& mean, const double& sigma) {
     pcg64* ptr = get_pcg64(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::lognormal_distribution<T> lognormal_dist(mean, sigma);
     ndfunc_t ndf = { _iter_rand<std::lognormal_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
     rand_opt_t<std::lognormal_distribution<T>> opt = { lognormal_dist, ptr };
     na_ndloop3(&ndf, &opt, 1, x);
-    return x;
   }
 
   static VALUE _numo_random_pcg64_lognormal(int argc, VALUE* argv, VALUE self) {
@@ -320,19 +349,25 @@ private:
     const double sigma = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
     if (sigma < 0) rb_raise(rb_eArgError, "sigma must be a non-negative value");
 
-    return klass == numo_cSFloat ? _rand_lognormal<float>(self, x, mean, sigma) : _rand_lognormal<double>(self, x, mean, sigma);
+    if (klass == numo_cSFloat) {
+      _rand_lognormal<float>(self, x, mean, sigma);
+    } else {
+      _rand_lognormal<double>(self, x, mean, sigma);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #standard_t
 
-  template<typename T> static VALUE _rand_t(VALUE& self, VALUE& x, const double& df) {
+  template<typename T> static void _rand_t(VALUE& self, VALUE& x, const double& df) {
     pcg64* ptr = get_pcg64(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::student_t_distribution<T> t_dist(df);
     ndfunc_t ndf = { _iter_rand<std::student_t_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
     rand_opt_t<std::student_t_distribution<T>> opt = { t_dist, ptr };
     na_ndloop3(&ndf, &opt, 1, x);
-    return x;
   }
 
   static VALUE _numo_random_pcg64_standard_t(int argc, VALUE* argv, VALUE self) {
@@ -349,7 +384,14 @@ private:
     const double df = NUM2DBL(kw_values[0]);
     if (df <= 0) rb_raise(rb_eArgError, "df must be > 0");
 
-    return klass == numo_cSFloat ? _rand_t<float>(self, x, df) : _rand_t<double>(self, x, df);
+    if (klass == numo_cSFloat) {
+      _rand_t<float>(self, x, df);
+    } else {
+      _rand_t<double>(self, x, df);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 };
 
