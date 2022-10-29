@@ -14,10 +14,13 @@ module Numo
     # @example
     #   require 'numo/random'
     #
-    #   x = Numo::DFloat.new(100)
+    #   rng = Numo::Random::Generator.new(seed: 496)
+    #   x = rng.uniform(shape: [2, 5], low: -1, high: 2)
     #
-    #   rng = Numo::Random::Generator.new
-    #   rng.uniform(x, low: -1, high: 2)
+    #   p x
+    #   # Numo::DFloat#shape=[2,5]
+    #   # [[1.90546, -0.543299, 0.673332, 0.759583, -0.40945],
+    #   #  [0.334635, -0.0558342, 1.28115, 1.93644, -0.0689543]]
     class Generator
       # Returns random number generation algorithm.
       # @return [String]
@@ -59,16 +62,14 @@ module Numo
         rng.random
       end
 
-      # Fills given array with random integer values in the interval [0, n).
+      # Generates array consists of random integer values in the interval [0, n).
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::Int32.new(3, 10)
-      #   w = Numo::DFloat[0.1, 0.6, 0.2]
-      #
       #   rng = Numo::Random::Generator.new(seed: 42)
-      #   rng.discrete(x, weight: w)
+      #   w = Numo::DFloat[0.1, 0.6, 0.2]
+      #   x = rng.discrete(shape: [3, 10], weight: w)
       #
       #   p x
       #
@@ -77,132 +78,177 @@ module Numo
       #   #  [0, 1, 0, 1, 1, 0, 1, 1, 2, 1],
       #   #  [2, 1, 1, 1, 1, 2, 2, 1, 1, 2]]
       #
-      # @param x [Numo::IntX | Numo::UIntX] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param weight [Numo::DFloat | Numo::SFloat] (shape: [n]) list of probabilities of each integer being generated.
-      def discrete(x, weight:)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::IntX | Numo::UIntX]
+      def discrete(shape:, weight:, dtype: :int32)
+        x = klass(dtype).new(shape)
         rng.discrete(x, weight: weight)
+        x
       end
 
-      # Fills given array with uniformly distributed random values in the interval [low, high).
+      # Generates array consists of uniformly distributed random values in the interval [low, high).
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::DFloat.new(100)
-      #
       #   rng = Numo::Random::Generator.new
-      #   rng.uniform(x, low: -1.5, high: 1.5)
+      #   x = rng.uniform(shape: 100, low: -1.5, high: 1.5)
       #
-      # @param x [Numo::DFloat | Numo::SFloat] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param low [Float] lower boundary.
       # @param high [Float] upper boundary.
-      def uniform(x, low: 0.0, high: 1.0)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def uniform(shape:, low: 0.0, high: 1.0, dtype: :float64)
+        x = klass(dtype).new(shape)
         rng.uniform(x, low: low, high: high)
+        x
       end
 
-      # Fills given array with random values according to the Cauchy (Lorentz) distribution.
+      # Generates array consists of random values according to the Cauchy (Lorentz) distribution.
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::DFloat.new(100)
-      #
       #   rng = Numo::Random::Generator.new
-      #   rng.cauchy(x, loc: 0.0, scale: 1.0)
+      #   x = rng.cauchy(shape: 100, loc: 0.0, scale: 1.0)
       #
-      # @param x [Numo::DFloat | Numo::SFloat] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param loc [Float] location parameter.
       # @param scale [Float] scale parameter.
-      def cauchy(x, loc: 0.0, scale: 1.0)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def cauchy(shape:, loc: 0.0, scale: 1.0, dtype: :float64)
+        x = klass(dtype).new(shape)
         rng.cauchy(x, loc: loc, scale: scale)
+        x
       end
 
-      # Fills given array with random values according to the Chi-squared distribution.
+      # Generates array consists of random values according to the Chi-squared distribution.
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::DFloat.new(100)
-      #
       #   rng = Numo::Random::Generator.new
-      #   rng.chisquare(x, df: 2.0)
+      #   x = rng.chisquare(shape: 100, df: 2.0)
       #
-      # @param x [Numo::DFloat | Numo::SFloat] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param df [Float] degrees of freedom, must be > 0.
-      def chisquare(x, df:)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def chisquare(shape:, df:, dtype: :float64)
+        x = klass(dtype).new(shape)
         rng.chisquare(x, df: df)
+        x
       end
 
-      # Fills given array with random values according to the F-distribution.
+      # Generates array consists of random values according to the F-distribution.
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::DFloat.new(100)
-      #
       #   rng = Numo::Random::Generator.new
-      #   rng.f(x, dfnum: 2.0, dfden: 4.0)
+      #   x = rng.f(shape: 100, dfnum: 2.0, dfden: 4.0)
       #
-      # @param x [Numo::DFloat | Numo::SFloat] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param dfnum [Float] degrees of freedom in numerator, must be > 0.
       # @param dfden [Float] degrees of freedom in denominator, must be > 0.
-      def f(x, dfnum:, dfden:)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def f(shape:, dfnum:, dfden:, dtype: :float64)
+        x = klass(dtype).new(shape)
         rng.f(x, dfnum: dfnum, dfden: dfden)
+        x
       end
 
-      # Fills given array with random values according to a normal (Gaussian) distribution.
+      # Generates array consists of random values according to a normal (Gaussian) distribution.
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::DFloat.new(100)
-      #
       #   rng = Numo::Random::Generator.new
-      #   rng.normal(x, loc: 0.0, scale: 1.0)
+      #   x = rng.normal(shape: 100, loc: 0.0, scale: 1.0)
       #
-      # @param x [Numo::DFloat | Numo::SFloat] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param loc [Float] location parameter.
       # @param scale [Float] scale parameter.
-      def normal(x, loc: 0.0, scale: 1.0)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def normal(shape:, loc: 0.0, scale: 1.0, dtype: :float64)
+        x = klass(dtype).new(shape)
         rng.normal(x, loc: loc, scale: scale)
+        x
       end
 
-      # Fills given array with random values according to a log-normal distribution.
+      # Generates array consists of random values according to a log-normal distribution.
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::DFloat.new(100)
-      #
       #   rng = Numo::Random::Generator.new
-      #   rng.lognormal(x, mean: 0.0, sigma: 1.0)
+      #   x = rng.lognormal(shape: 100, mean: 0.0, sigma: 1.0)
       #
-      # @param x [Numo::DFloat | Numo::SFloat] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param mean [Float] mean of normal distribution.
       # @param sigma [Float] standard deviation of normal distribution.
-      def lognormal(x, mean: 0.0, sigma: 1.0)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def lognormal(shape:, mean: 0.0, sigma: 1.0, dtype: :float64)
+        x = klass(dtype).new(shape)
         rng.lognormal(x, mean: mean, sigma: sigma)
+        x
       end
 
-      # Fills given array with random values according to the Student's t-distribution.
+      # Generates array consists of random values according to the Student's t-distribution.
       #
       # @example
       #   require 'numo/random'
       #
-      #   x = Numo::DFloat.new(100)
-      #
       #   rng = Numo::Random::Generator.new
-      #   rng.standard_t(x, df: 8.0)
+      #   x = rng.standard_t(shape: 100, df: 8.0)
       #
-      # @param x [Numo::DFloat | Numo::SFloat] array filled with random values.
+      # @param shape [Integer | Array<Integer>] size of random array.
       # @param df [Float] degrees of freedom, must be > 0.
-      def standard_t(x, df:)
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def standard_t(shape:, df:, dtype: :float64)
+        x = klass(dtype).new(shape)
         rng.standard_t(x, df: df)
+        x
       end
 
       private
 
       attr_reader :rng
+
+      def klass(dtype) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
+        case dtype.to_sym
+        when :int8
+          Numo::Int8
+        when :int16
+          Numo::Int16
+        when :int32
+          Numo::Int32
+        when :int64
+          Numo::Int64
+        when :uint8
+          Numo::UInt8
+        when :uint16
+          Numo::UInt16
+        when :uint32
+          Numo::UInt32
+        when :uint64
+          Numo::UInt64
+        when :float32, :sfloat
+          Numo::SFloat
+        when :float64, :dfloat
+          Numo::DFloat
+        else
+          raise ArgumentError, "wrong dtype is given: #{dtype}"
+        end
+      end
     end
   end
 end
