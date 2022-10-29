@@ -17,6 +17,63 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#discrete' do
+    let(:w) { Numo::DFloat[0.1, 0.6, 0.3] }
+
+    [Numo::Int8, Numo::Int16, Numo::Int32, Numo::Int64,
+     Numo::UInt8, Numo::UInt16, Numo::UInt32, Numo::UInt64].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(100, 100).tap { |x| rng.discrete(x, weight: w) } }
+
+        it 'obtained randomized integer number from a discrete distribution', :aggregate_failures do
+          expect(x).to be_a(klass)
+          expect(x.eq(0).count.fdiv(x.size)).to be_within(1e-2).of(w[0])
+          expect(x.eq(1).count.fdiv(x.size)).to be_within(1e-2).of(w[1])
+          expect(x.eq(2).count.fdiv(x.size)).to be_within(1e-2).of(w[2])
+        end
+      end
+    end
+
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(2, 2) }
+
+        it 'raises TypeError' do
+          expect do
+            rng.discrete(x, weight: w)
+          end.to raise_error(TypeError, 'invalid NArray class, it must be integer typed array')
+        end
+      end
+    end
+
+    context 'when given integer typed array to weight' do
+      let(:x) { Numo::Int32.new(2, 2) }
+      let(:w) { Numo::Int32[1, 6, 3] }
+
+      it 'raises TypeError' do
+        expect { rng.discrete(x, weight: w) }.to raise_error(TypeError, 'weight must be Numo::DFloat or Numo::SFloat')
+      end
+    end
+
+    context 'when given multi-dimensional array to weight' do
+      let(:x) { Numo::Int32.new(2, 2) }
+      let(:w) { Numo::DFloat[[0.1, 0.6, 0.3], [0.1, 0.1, 0.8]] }
+
+      it 'raises ArgumentError' do
+        expect { rng.discrete(x, weight: w) }.to raise_error(ArgumentError, 'weight must be 1-dimensional array')
+      end
+    end
+
+    context 'when given empty array to weight' do
+      let(:x) { Numo::Int32.new(2, 2) }
+      let(:w) { Numo::DFloat[] }
+
+      it 'raises ArgumentError' do
+        expect { rng.discrete(x, weight: w) }.to raise_error(ArgumentError, 'length of weight must be > 0')
+      end
+    end
+  end
+
   describe '#uniform' do
     context 'when array type is DFloat' do
       let(:x) { Numo::DFloat.new(500, 600).tap { |x| rng.uniform(x, low: 1, high: 4) } }

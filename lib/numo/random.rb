@@ -59,6 +59,30 @@ module Numo
         rng.random
       end
 
+      # Fills given array with random integer values in the interval [0, n).
+      #
+      # @example
+      #   require 'numo/random'
+      #
+      #   x = Numo::Int32.new(3, 10)
+      #   w = Numo::DFloat[0.1, 0.6, 0.2]
+      #
+      #   rng = Numo::Random::Generator.new(seed: 42)
+      #   rng.discrete(x, weight: w)
+      #
+      #   p x
+      #
+      #   # Numo::Int32#shape=[3,10]
+      #   # [[1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+      #   #  [0, 1, 0, 1, 1, 0, 1, 1, 2, 1],
+      #   #  [2, 1, 1, 1, 1, 2, 2, 1, 1, 2]]
+      #
+      # @param x [Numo::IntX | Numo::UIntX] array filled with random values.
+      # @param weight [Numo::DFloat | Numo::SFloat] (shape: [n]) list of probabilities of each integer being generated.
+      def discrete(x, weight:)
+        rng.discrete(x, weight: weight)
+      end
+
       # Fills given array with uniformly distributed random values in the interval [low, high).
       #
       # @example

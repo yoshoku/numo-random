@@ -58,6 +58,7 @@ public:
     rb_define_method(rb_cPCG64, "seed=", RUBY_METHOD_FUNC(_numo_random_pcg64_set_seed), 1);
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
+    rb_define_method(rb_cPCG64, "discrete", RUBY_METHOD_FUNC(_numo_random_pcg64_discrete), -1);
     rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
     rb_define_method(rb_cPCG64, "cauchy", RUBY_METHOD_FUNC(_numo_random_pcg64_cauchy), -1);
     rb_define_method(rb_cPCG64, "chisquare", RUBY_METHOD_FUNC(_numo_random_pcg64_chisquare), -1);
@@ -141,6 +142,89 @@ private:
         SET_DATA_STRIDE(p1, s1, T, opt->dist(*(opt->rnd)));
       }
     }
+  }
+
+  // #discrete
+
+  template<typename T, typename P> static void _rand_discrete(VALUE& self, VALUE& x, const std::vector<P>& weight) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::discrete_distribution<T> discrete_dist(weight.begin(), weight.end());
+    ndfunc_t ndf = { _iter_rand<std::discrete_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::discrete_distribution<T>> opt = { discrete_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+  }
+
+  static VALUE _numo_random_pcg64_discrete(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[1] = { rb_intern("weight") };
+    VALUE kw_values[1] = { Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 1, 0, kw_values);
+
+    VALUE klass = rb_obj_class(x);
+    if (klass != numo_cInt8 && klass != numo_cInt16 && klass != numo_cInt32 && klass != numo_cInt64
+        && klass != numo_cUInt8 && klass != numo_cUInt16 && klass != numo_cUInt32 && klass != numo_cUInt64)
+      rb_raise(rb_eTypeError, "invalid NArray class, it must be integer typed array");
+
+    VALUE w = kw_values[0];
+    VALUE w_klass = rb_obj_class(w);
+    if (w_klass != numo_cSFloat && w_klass != numo_cDFloat) rb_raise(rb_eTypeError, "weight must be Numo::DFloat or Numo::SFloat");
+
+    if (!RTEST(nary_check_contiguous(w))) w = nary_dup(w);
+    narray_t* w_nary;
+    GetNArray(w, w_nary);
+    if (NA_NDIM(w_nary) != 1) rb_raise(rb_eArgError, "weight must be 1-dimensional array");
+
+    const size_t w_len = NA_SHAPE(w_nary)[0];
+    if (w_len < 1) rb_raise(rb_eArgError, "length of weight must be > 0");
+
+    if (w_klass == numo_cSFloat) {
+      const float* w_ptr = (float*)na_get_pointer_for_read(w);
+      std::vector<float> w_vec(w_ptr, w_ptr + w_len);
+      if (klass == numo_cInt8) {
+        _rand_discrete<int8_t, float>(self, x, w_vec);
+      } else if (klass == numo_cInt16) {
+        _rand_discrete<int16_t, float>(self, x, w_vec);
+      } else if (klass == numo_cInt32) {
+        _rand_discrete<int32_t, float>(self, x, w_vec);
+      } else if (klass == numo_cInt64) {
+        _rand_discrete<int64_t, float>(self, x, w_vec);
+      } else if (klass == numo_cUInt8) {
+        _rand_discrete<uint8_t, float>(self, x, w_vec);
+      } else if (klass == numo_cUInt16) {
+        _rand_discrete<uint16_t, float>(self, x, w_vec);
+      } else if (klass == numo_cUInt32) {
+        _rand_discrete<uint32_t, float>(self, x, w_vec);
+      } else if (klass == numo_cUInt64) {
+        _rand_discrete<uint64_t, float>(self, x, w_vec);
+      }
+    } else {
+      const double* w_ptr = (double*)na_get_pointer_for_read(w);
+      std::vector<double> w_vec(w_ptr, w_ptr + w_len);
+      if (klass == numo_cInt8) {
+        _rand_discrete<int8_t, double>(self, x, w_vec);
+      } else if (klass == numo_cInt16) {
+        _rand_discrete<int16_t, double>(self, x, w_vec);
+      } else if (klass == numo_cInt32) {
+        _rand_discrete<int32_t, double>(self, x, w_vec);
+      } else if (klass == numo_cInt64) {
+        _rand_discrete<int64_t, double>(self, x, w_vec);
+      } else if (klass == numo_cUInt8) {
+        _rand_discrete<uint8_t, double>(self, x, w_vec);
+      } else if (klass == numo_cUInt16) {
+        _rand_discrete<uint16_t, double>(self, x, w_vec);
+      } else if (klass == numo_cUInt32) {
+        _rand_discrete<uint32_t, double>(self, x, w_vec);
+      } else if (klass == numo_cUInt64) {
+        _rand_discrete<uint64_t, double>(self, x, w_vec);
+      }
+    }
+
+    RB_GC_GUARD(w);
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #uniform
