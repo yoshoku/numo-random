@@ -33,14 +33,11 @@ require 'numo/gnuplot'
 
 require 'numo/random'
 
-# Prepareing array to be filled with random numbers.
-x = Numo::DFloat.new(5000, 2)
-
 # Creating random number generator.
 rng = Numo::Random::Generator.new(seed: 42)
 
 # Generating random numbers with a normal distribution.
-rng.normal(x, loc: 0.0, scale: 1.0)
+x = rng.normal(shape: [5000, 2], loc: 0.0, scale: 1.0)
 
 # Plotting the generated result.
 Numo.gnuplot do
