@@ -17,6 +17,18 @@ RSpec.describe Numo::Random::Generator do
     end
   end
 
+  describe '#poisson' do
+    %i[int8 int16 int32 int64 uint8 uint16 uint32 uint64].each do |dtype|
+      context "when array type is #{dtype}" do
+        let(:x) { rng.poisson(shape: [1000], mean: 4, dtype: dtype) }
+
+        it 'obtained randomized integer number from the Poisson distribution', :aggregate_failures do
+          expect(x.bincount.max_index).to eq(4)
+        end
+      end
+    end
+  end
+
   describe '#discrete' do
     let(:w) { Numo::DFloat[0.1, 0.6, 0.3] }
 

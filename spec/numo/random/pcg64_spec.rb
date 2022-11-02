@@ -17,6 +17,46 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#poisson' do
+    [Numo::Int8, Numo::Int16, Numo::Int32, Numo::Int64,
+     Numo::UInt8, Numo::UInt16, Numo::UInt32, Numo::UInt64].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(1000).tap { |x| rng.poisson(x, mean: 4) } }
+
+        it 'obtained randomized integer number from the Poisson distribution', :aggregate_failures do
+          expect(x).to be_a(klass)
+          expect(x.bincount.max_index).to eq(4)
+        end
+      end
+    end
+
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(5) }
+
+        it 'raises TypeError' do
+          expect { rng.poisson(x) }.to raise_error(TypeError, 'invalid NArray class, it must be integer typed array')
+        end
+      end
+    end
+
+    context 'when negative value is given to mean' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.poisson(x, mean: -1) }.to raise_error(ArgumentError, 'mean must be > 0')
+      end
+    end
+
+    context 'when zero is given to mean' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.poisson(x, mean: 0) }.to raise_error(ArgumentError, 'mean must be > 0')
+      end
+    end
+  end
+
   describe '#discrete' do
     let(:w) { Numo::DFloat[0.1, 0.6, 0.3] }
 

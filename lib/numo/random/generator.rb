@@ -57,6 +57,24 @@ module Numo
         rng.random
       end
 
+      # Generates array consists of random values according to the Poisson distribution.
+      #
+      # @example
+      #   require 'numo/random'
+      #
+      #   rng = Numo::Random::Generator.new(seed: 42)
+      #   x = rng.poisson(shape: 1000, mean: 4)
+      #
+      # @param shape [Integer | Array<Integer>] size of random array.
+      # @param mean [Float] mean of poisson distribution.
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::IntX | Numo::UIntX]
+      def poisson(shape:, mean: 1.0, dtype: :int32)
+        x = klass(dtype).new(shape)
+        rng.poisson(x, mean: mean)
+        x
+      end
+
       # Generates array consists of random integer values in the interval [0, n).
       #
       # @example

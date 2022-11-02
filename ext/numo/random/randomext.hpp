@@ -58,6 +58,7 @@ public:
     rb_define_method(rb_cPCG64, "seed=", RUBY_METHOD_FUNC(_numo_random_pcg64_set_seed), 1);
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
+    rb_define_method(rb_cPCG64, "poisson", RUBY_METHOD_FUNC(_numo_random_pcg64_poisson), -1);
     rb_define_method(rb_cPCG64, "discrete", RUBY_METHOD_FUNC(_numo_random_pcg64_discrete), -1);
     rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
     rb_define_method(rb_cPCG64, "cauchy", RUBY_METHOD_FUNC(_numo_random_pcg64_cauchy), -1);
@@ -142,6 +143,55 @@ private:
         SET_DATA_STRIDE(p1, s1, T, opt->dist(*(opt->rnd)));
       }
     }
+  }
+
+  // #poisson
+
+  template<typename T> static void _rand_poisson(VALUE& self, VALUE& x, const double& mean) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::poisson_distribution<T> poisson_dist(mean);
+    ndfunc_t ndf = { _iter_rand<std::poisson_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::poisson_distribution<T>> opt = { poisson_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+  }
+
+  static VALUE _numo_random_pcg64_poisson(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("mean") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 0, 1, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cInt8 && klass != numo_cInt16 && klass != numo_cInt32 && klass != numo_cInt64
+        && klass != numo_cUInt8 && klass != numo_cUInt16 && klass != numo_cUInt32 && klass != numo_cUInt64)
+      rb_raise(rb_eTypeError, "invalid NArray class, it must be integer typed array");
+
+    const double mean = kw_values[0] == Qundef ? 0.0 : NUM2DBL(kw_values[0]);
+    if (mean <= 0.0) rb_raise(rb_eArgError, "mean must be > 0");
+
+    if (klass == numo_cInt8) {
+      _rand_poisson<int8_t>(self, x, mean);
+    } else if (klass == numo_cInt16) {
+      _rand_poisson<int16_t>(self, x, mean);
+    } else if (klass == numo_cInt32) {
+      _rand_poisson<int32_t>(self, x, mean);
+    } else if (klass == numo_cInt64) {
+      _rand_poisson<int64_t>(self, x, mean);
+    } else if (klass == numo_cUInt8) {
+      _rand_poisson<uint8_t>(self, x, mean);
+    } else if (klass == numo_cUInt16) {
+      _rand_poisson<uint16_t>(self, x, mean);
+    } else if (klass == numo_cUInt32) {
+      _rand_poisson<uint32_t>(self, x, mean);
+    } else if (klass == numo_cUInt64) {
+      _rand_poisson<uint64_t>(self, x, mean);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #discrete
