@@ -55,6 +55,60 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#gamma' do
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(500, 20).tap { |x| rng.gamma(x, k: 9, scale: 0.5) } }
+
+        it 'obtains random numbers form a gamma distribution', :aggregate_failures do
+          expect(x).to be_a(klass)
+          expect(x.mean).to be_within(1e-2).of(4.5)
+          expect(x.var).to be_within(1e-1).of(2.25)
+        end
+      end
+    end
+
+    context 'when negative value is given to k' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.gamma(x, k: -5) }.to raise_error(ArgumentError, 'k must be > 0')
+      end
+    end
+
+    context 'when negative value is given to scale' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.gamma(x, k: 1, scale: -10) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when zero is given to k' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.gamma(x, k: 0) }.to raise_error(ArgumentError, 'k must be > 0')
+      end
+    end
+
+    context 'when zero is given to scale' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.gamma(x, k: 1, scale: 0) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when array type is Int32' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises TypeError' do
+        expect { rng.gamma(x, k: 1) }.to raise_error(TypeError, 'invalid NArray class, it must be DFloat or SFloat')
+      end
+    end
+  end
+
   describe '#poisson' do
     [Numo::Int8, Numo::Int16, Numo::Int32, Numo::Int64,
      Numo::UInt8, Numo::UInt16, Numo::UInt32, Numo::UInt64].each do |klass|

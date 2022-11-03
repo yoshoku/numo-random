@@ -75,6 +75,25 @@ module Numo
         x
       end
 
+      # Generates array consists of random values with a gamma distribution.
+      #
+      # @example
+      #   require 'numo/random'
+      #
+      #   rng = Numo::Random::Generator.new
+      #   x = rng.gamma(shape: 100, k: 9, scale: 0.5)
+      #
+      # @param shape [Integer | Array<Integer>] size of random array.
+      # @param k [Float] shape parameter.
+      # @param scale [Float] scale parameter.
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def gamma(shape:, k:, scale: 1.0, dtype: :float64)
+        x = klass(dtype).new(shape)
+        rng.gamma(x, k: k, scale: scale)
+        x
+      end
+
       # Generates array consists of random values according to the Poisson distribution.
       #
       # @example

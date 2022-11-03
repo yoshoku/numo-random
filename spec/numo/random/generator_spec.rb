@@ -39,6 +39,28 @@ RSpec.describe Numo::Random::Generator do
     end
   end
 
+  describe '#gamma' do
+    context 'when array type is DFloat' do
+      let(:x) { rng.gamma(shape: [500, 60], k: 0.5, scale: 2) }
+
+      it 'obtains random numbers form a gamma distribution', :aggregate_failures do
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(1)
+        expect(x.var).to be_within(1e-2).of(2)
+      end
+    end
+
+    context 'when array type is SFloat' do
+      let(:x) { rng.gamma(shape: [500, 60], k: 0.5, scale: 2, dtype: :float32) }
+
+      it 'obtains random numbers form a gamma distribution', :aggregate_failures do
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(1)
+        expect(x.var).to be_within(1e-2).of(2)
+      end
+    end
+  end
+
   describe '#poisson' do
     %i[int8 int16 int32 int64 uint8 uint16 uint32 uint64].each do |dtype|
       context "when array type is #{dtype}" do

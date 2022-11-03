@@ -59,6 +59,7 @@ public:
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
     rb_define_method(rb_cPCG64, "exponential", RUBY_METHOD_FUNC(_numo_random_pcg64_exponential), -1);
+    rb_define_method(rb_cPCG64, "gamma", RUBY_METHOD_FUNC(_numo_random_pcg64_gamma), -1);
     rb_define_method(rb_cPCG64, "poisson", RUBY_METHOD_FUNC(_numo_random_pcg64_poisson), -1);
     rb_define_method(rb_cPCG64, "discrete", RUBY_METHOD_FUNC(_numo_random_pcg64_discrete), -1);
     rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
@@ -176,6 +177,44 @@ private:
       _rand_exponential<float>(self, x, lam);
     } else {
       _rand_exponential<double>(self, x, lam);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
+  }
+
+  // #gamma
+
+  template<typename T> static void _rand_gamma(VALUE& self, VALUE& x, const double& k, const double&scale) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::gamma_distribution<T> gamma_dist(k, scale);
+    ndfunc_t ndf = { _iter_rand<std::gamma_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::gamma_distribution<T>> opt = { gamma_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+  }
+
+  static VALUE _numo_random_pcg64_gamma(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("k"), rb_intern("scale") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 1, 1, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    const double k = NUM2DBL(kw_values[0]);
+    if (k <= 0) rb_raise(rb_eArgError, "k must be > 0");
+    const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
+    if (scale <= 0) rb_raise(rb_eArgError, "scale must be > 0");
+
+    const double lam = 1.0 / scale;
+    if (klass == numo_cSFloat) {
+      _rand_gamma<float>(self, x, k, scale);
+    } else {
+      _rand_gamma<double>(self, x, k, scale);
     }
 
     RB_GC_GUARD(x);
