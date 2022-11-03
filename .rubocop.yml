@@ -18,6 +18,9 @@ Gemspec/RequiredRubyVersion:
 Layout/LineLength:
   AllowedPatterns: ['(\A|\s)#']
 
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: false
+
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
