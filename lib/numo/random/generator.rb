@@ -16,7 +16,7 @@ module Numo
     #   # Numo::DFloat#shape=[2,5]
     #   # [[1.90546, -0.543299, 0.673332, 0.759583, -0.40945],
     #   #  [0.334635, -0.0558342, 1.28115, 1.93644, -0.0689543]]
-    class Generator
+    class Generator # rubocop:disable Metrics/ClassLength
       # Returns random number generation algorithm.
       # @return [String]
       attr_accessor :algorithm
@@ -91,6 +91,25 @@ module Numo
       def gamma(shape:, k:, scale: 1.0, dtype: :float64)
         x = klass(dtype).new(shape)
         rng.gamma(x, k: k, scale: scale)
+        x
+      end
+
+      # Generates array consists of random values according to the Gumbel distribution.
+      #
+      # @example
+      #   require 'numo/random'
+      #
+      #   rng = Numo::Random::Generator.new
+      #   x = rng.gumbel(shape: 100, loc: 0.0, scale: 1.0)
+      #
+      # @param shape [Integer | Array<Integer>] size of random array.
+      # @param loc [Float] location parameter.
+      # @param scale [Float] scale parameter.
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def gumbel(shape:, loc: 0.0, scale: 1.0, dtype: :float64)
+        x = klass(dtype).new(shape)
+        rng.gumbel(x, loc: loc, scale: scale)
         x
       end
 

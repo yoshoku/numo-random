@@ -60,6 +60,7 @@ public:
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
     rb_define_method(rb_cPCG64, "exponential", RUBY_METHOD_FUNC(_numo_random_pcg64_exponential), -1);
     rb_define_method(rb_cPCG64, "gamma", RUBY_METHOD_FUNC(_numo_random_pcg64_gamma), -1);
+    rb_define_method(rb_cPCG64, "gumbel", RUBY_METHOD_FUNC(_numo_random_pcg64_gumbel), -1);
     rb_define_method(rb_cPCG64, "poisson", RUBY_METHOD_FUNC(_numo_random_pcg64_poisson), -1);
     rb_define_method(rb_cPCG64, "discrete", RUBY_METHOD_FUNC(_numo_random_pcg64_discrete), -1);
     rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
@@ -215,6 +216,42 @@ private:
       _rand_gamma<float>(self, x, k, scale);
     } else {
       _rand_gamma<double>(self, x, k, scale);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
+  }
+
+  // #gumbel
+
+  template<typename T> static void _rand_gumbel(VALUE& self, VALUE& x, const double& loc, const double&scale) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::extreme_value_distribution<T> extreme_value_dist(loc, scale);
+    ndfunc_t ndf = { _iter_rand<std::extreme_value_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::extreme_value_distribution<T>> opt = { extreme_value_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+  }
+
+  static VALUE _numo_random_pcg64_gumbel(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("loc"), rb_intern("scale") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    const double loc = kw_values[0] == Qundef ? 0.0 : NUM2DBL(kw_values[0]);
+    const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
+    if (scale <= 0) rb_raise(rb_eArgError, "scale must be > 0");
+
+    if (klass == numo_cSFloat) {
+      _rand_gumbel<float>(self, x, loc, scale);
+    } else {
+      _rand_gumbel<double>(self, x, loc, scale);
     }
 
     RB_GC_GUARD(x);

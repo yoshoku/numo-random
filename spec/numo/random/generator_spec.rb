@@ -41,7 +41,7 @@ RSpec.describe Numo::Random::Generator do
 
   describe '#gamma' do
     context 'when array type is DFloat' do
-      let(:x) { rng.gamma(shape: [500, 60], k: 0.5, scale: 2) }
+      let(:x) { rng.gamma(shape: [500, 200], k: 0.5, scale: 2) }
 
       it 'obtains random numbers form a gamma distribution', :aggregate_failures do
         expect(x).to be_a(Numo::DFloat)
@@ -51,12 +51,34 @@ RSpec.describe Numo::Random::Generator do
     end
 
     context 'when array type is SFloat' do
-      let(:x) { rng.gamma(shape: [500, 60], k: 0.5, scale: 2, dtype: :float32) }
+      let(:x) { rng.gamma(shape: [500, 200], k: 0.5, scale: 2, dtype: :float32) }
 
       it 'obtains random numbers form a gamma distribution', :aggregate_failures do
         expect(x).to be_a(Numo::SFloat)
         expect(x.mean).to be_within(1e-2).of(1)
         expect(x.var).to be_within(1e-2).of(2)
+      end
+    end
+  end
+
+  describe '#gumbel' do
+    context 'when array type is DFloat' do
+      let(:x) { rng.gumbel(shape: [500, 400]) }
+
+      it 'obtains random numbers form the Gumbel distribution', :aggregate_failures do
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(0.57)
+        expect(x.var).to be_within(2e-2).of((Math::PI**2).fdiv(6))
+      end
+    end
+
+    context 'when array type is SFloat' do
+      let(:x) { rng.gumbel(shape: [500, 400], dtype: :float32) }
+
+      it 'obtains random numbers form the Gumbel distribution', :aggregate_failures do
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(0.57)
+        expect(x.var).to be_within(2e-2).of((Math::PI**2).fdiv(6))
       end
     end
   end

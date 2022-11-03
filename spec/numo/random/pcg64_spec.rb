@@ -109,6 +109,53 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#gumbel' do
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context 'when array type is DFloat' do
+        let(:x) { klass.new(500, 400).tap { |x| rng.gumbel(x) } }
+
+        it 'obtains random numbers form the Gumbel distribution', :aggregate_failures do
+          expect(x).to be_a(klass)
+          expect(x.mean).to be_within(1e-2).of(0.57)
+          expect(x.var).to be_within(2e-2).of((Math::PI**2).fdiv(6))
+        end
+      end
+    end
+
+    context 'when loc and scale parameters are given' do
+      let(:x) { Numo::DFloat.new(500, 400).tap { |x| rng.gumbel(x, loc: 4, scale: 3) } }
+
+      it 'obtains random numbers form a normal distribution along with given parameters', :aggregate_failures do
+        expect(x.mean).to be_within(1e-2).of(4 + 3 * 0.577)
+        expect(x.var).to be_within(1e-1).of((Math::PI**2).fdiv(6) * 9)
+      end
+    end
+
+    context 'when negative value is given to scale' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.gumbel(x, scale: -100) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when zero is given to scale' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.gumbel(x, scale: 0) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when array type is Int32' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises TypeError' do
+        expect { rng.gumbel(x) }.to raise_error(TypeError, 'invalid NArray class, it must be DFloat or SFloat')
+      end
+    end
+  end
+
   describe '#poisson' do
     [Numo::Int8, Numo::Int16, Numo::Int32, Numo::Int64,
      Numo::UInt8, Numo::UInt16, Numo::UInt32, Numo::UInt64].each do |klass|
