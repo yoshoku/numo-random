@@ -17,6 +17,44 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#exponential' do
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(5000).tap { |x| rng.exponential(x, scale: 0.5) } }
+
+        it 'obtains random numbers from an exponential distribution', :aggregate_failures do
+          expect(x).to be_a(klass)
+          expect(x.mean).to be_within(1e-2).of(0.5)
+          expect(x.var).to be_within(1e-2).of(0.25)
+        end
+      end
+    end
+
+    context 'when scale is negative value' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.exponential(x, scale: -1) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when scale is given to mean' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.exponential(x, scale: 0) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when array type is Int32' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises TypeError' do
+        expect { rng.exponential(x) }.to raise_error(TypeError, 'invalid NArray class, it must be DFloat or SFloat')
+      end
+    end
+  end
+
   describe '#poisson' do
     [Numo::Int8, Numo::Int16, Numo::Int32, Numo::Int64,
      Numo::UInt8, Numo::UInt16, Numo::UInt32, Numo::UInt64].each do |klass|

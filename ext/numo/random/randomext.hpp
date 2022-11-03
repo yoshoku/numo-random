@@ -58,6 +58,7 @@ public:
     rb_define_method(rb_cPCG64, "seed=", RUBY_METHOD_FUNC(_numo_random_pcg64_set_seed), 1);
     rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
+    rb_define_method(rb_cPCG64, "exponential", RUBY_METHOD_FUNC(_numo_random_pcg64_exponential), -1);
     rb_define_method(rb_cPCG64, "poisson", RUBY_METHOD_FUNC(_numo_random_pcg64_poisson), -1);
     rb_define_method(rb_cPCG64, "discrete", RUBY_METHOD_FUNC(_numo_random_pcg64_discrete), -1);
     rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
@@ -143,6 +144,42 @@ private:
         SET_DATA_STRIDE(p1, s1, T, opt->dist(*(opt->rnd)));
       }
     }
+  }
+
+  // #exponential
+
+  template<typename T> static void _rand_exponential(VALUE& self, VALUE& x, const double& lam) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::exponential_distribution<T> exponential_dist(lam);
+    ndfunc_t ndf = { _iter_rand<std::exponential_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::exponential_distribution<T>> opt = { exponential_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+  }
+
+  static VALUE _numo_random_pcg64_exponential(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[1] = { rb_intern("scale") };
+    VALUE kw_values[1] = { Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 0, 1, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    const double scale = kw_values[0] == Qundef ? 1.0 : NUM2DBL(kw_values[0]);
+    if (scale <= 0) rb_raise(rb_eArgError, "scale must be > 0");
+
+    const double lam = 1.0 / scale;
+    if (klass == numo_cSFloat) {
+      _rand_exponential<float>(self, x, lam);
+    } else {
+      _rand_exponential<double>(self, x, lam);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
   }
 
   // #poisson
