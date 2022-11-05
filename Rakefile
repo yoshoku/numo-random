@@ -13,7 +13,7 @@ require 'rake/extensiontask'
 
 task build: :compile # rubocop:disable Rake/Desc
 
-Rake::ExtensionTask.new('randomext') do |ext|
+Rake::ExtensionTask.new('ext') do |ext|
   ext.ext_dir = 'ext/numo/random'
   ext.lib_dir = 'lib/numo/random'
 end

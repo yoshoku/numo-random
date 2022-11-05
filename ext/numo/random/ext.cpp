@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-#include "randomext.hpp"
+#include "ext.hpp"
 
-extern "C" void Init_randomext(void) {
+extern "C" void Init_ext(void) {
   rb_require("numo/narray");
 
   VALUE rb_mNumoRandom = rb_define_module_under(mNumo, "Random");

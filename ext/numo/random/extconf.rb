@@ -26,4 +26,4 @@ $CXXFLAGS << " -std=c++11"
 $INCFLAGS << " -I$(srcdir)/src"
 $VPATH << "$(srcdir)/src"
 
-create_makefile("numo/random/randomext")
+create_makefile("numo/random/ext")

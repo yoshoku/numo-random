@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef NUMO_RANDOMEXT_HPP
-#define NUMO_RANDOMEXT_HPP 1
+#ifndef NUMO_RANDOM_EXT_HPP
+#define NUMO_RANDOM_EXT_HPP 1
 
 #include <ruby.h>
 
@@ -691,4 +691,4 @@ const rb_data_type_t RbNumoRandomPCG64::pcg64_type = {
   RUBY_TYPED_FREE_IMMEDIATELY
 };
 
-#endif /* NUMO_RANDOMEXT_HPP */
+#endif /* NUMO_RANDOM_EXT_HPP */

@@ -3,5 +3,5 @@
 require 'numo/narray'
 
 require_relative 'random/version'
-require_relative 'random/randomext'
+require_relative 'random/ext'
 require_relative 'random/generator'
