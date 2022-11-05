@@ -131,6 +131,25 @@ module Numo
         x
       end
 
+      # Generates array consists of random values with the Weibull distribution.
+      #
+      # @example
+      #   require 'numo/random'
+      #
+      #   rng = Numo::Random::Generator.new
+      #   x = rng.weibull(shape: 100, k: 5, scale: 2)
+      #
+      # @param shape [Integer | Array<Integer>] size of random array.
+      # @param k [Float] shape parameter.
+      # @param scale [Float] scale parameter.
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::DFloat | Numo::SFloat]
+      def weibull(shape:, k:, scale: 1.0, dtype: :float64)
+        x = klass(dtype).new(shape)
+        rng.weibull(x, k: k, scale: scale)
+        x
+      end
+
       # Generates array consists of random integer values in the interval [0, n).
       #
       # @example

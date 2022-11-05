@@ -95,6 +95,28 @@ RSpec.describe Numo::Random::Generator do
     end
   end
 
+  describe '#weibull' do
+    context 'when array type is DFloat' do
+      let(:x) { rng.weibull(shape: [500, 200], k: 5, scale: 2) }
+
+      it 'obtains random numbers form the Weibull distribution', :aggregate_failures do
+        expect(x).to be_a(Numo::DFloat)
+        expect(x.mean).to be_within(1e-2).of(2 * Math.gamma(1.2))
+        expect(x.var).to be_within(1e-2).of(4 * (Math.gamma(1.4) - Math.gamma(1.2)**2))
+      end
+    end
+
+    context 'when array type is SFloat' do
+      let(:x) { rng.weibull(shape: [500, 200], k: 5, scale: 2, dtype: :float32) }
+
+      it 'obtains random numbers form the Weibull distribution', :aggregate_failures do
+        expect(x).to be_a(Numo::SFloat)
+        expect(x.mean).to be_within(1e-2).of(2 * Math.gamma(1.2))
+        expect(x.var).to be_within(1e-2).of(4 * (Math.gamma(1.4) - Math.gamma(1.2)**2))
+      end
+    end
+  end
+
   describe '#discrete' do
     let(:w) { Numo::DFloat[0.1, 0.6, 0.3] }
 

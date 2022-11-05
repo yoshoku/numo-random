@@ -62,6 +62,7 @@ public:
     rb_define_method(rb_cPCG64, "gamma", RUBY_METHOD_FUNC(_numo_random_pcg64_gamma), -1);
     rb_define_method(rb_cPCG64, "gumbel", RUBY_METHOD_FUNC(_numo_random_pcg64_gumbel), -1);
     rb_define_method(rb_cPCG64, "poisson", RUBY_METHOD_FUNC(_numo_random_pcg64_poisson), -1);
+    rb_define_method(rb_cPCG64, "weibull", RUBY_METHOD_FUNC(_numo_random_pcg64_weibull), -1);
     rb_define_method(rb_cPCG64, "discrete", RUBY_METHOD_FUNC(_numo_random_pcg64_discrete), -1);
     rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
     rb_define_method(rb_cPCG64, "cauchy", RUBY_METHOD_FUNC(_numo_random_pcg64_cauchy), -1);
@@ -211,7 +212,6 @@ private:
     const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
     if (scale <= 0) rb_raise(rb_eArgError, "scale must be > 0");
 
-    const double lam = 1.0 / scale;
     if (klass == numo_cSFloat) {
       _rand_gamma<float>(self, x, k, scale);
     } else {
@@ -301,6 +301,43 @@ private:
       _rand_poisson<uint32_t>(self, x, mean);
     } else if (klass == numo_cUInt64) {
       _rand_poisson<uint64_t>(self, x, mean);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
+  }
+
+  // #weibull
+
+  template<typename T> static void _rand_weibull(VALUE& self, VALUE& x, const double& k, const double&scale) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::weibull_distribution<T> weibull_dist(k, scale);
+    ndfunc_t ndf = { _iter_rand<std::weibull_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::weibull_distribution<T>> opt = { weibull_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+  }
+
+  static VALUE _numo_random_pcg64_weibull(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[2] = { rb_intern("k"), rb_intern("scale") };
+    VALUE kw_values[2] = { Qundef, Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 1, 1, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cSFloat && klass != numo_cDFloat) rb_raise(rb_eTypeError, "invalid NArray class, it must be DFloat or SFloat");
+
+    const double k = NUM2DBL(kw_values[0]);
+    if (k <= 0) rb_raise(rb_eArgError, "k must be > 0");
+    const double scale = kw_values[1] == Qundef ? 1.0 : NUM2DBL(kw_values[1]);
+    if (scale <= 0) rb_raise(rb_eArgError, "scale must be > 0");
+
+    if (klass == numo_cSFloat) {
+      _rand_weibull<float>(self, x, k, scale);
+    } else {
+      _rand_weibull<double>(self, x, k, scale);
     }
 
     RB_GC_GUARD(x);

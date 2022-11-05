@@ -196,6 +196,59 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#weibull' do
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(500, 200).tap { |x| rng.weibull(x, k: 5) } }
+
+        it 'obtains random numbers form the Weibull distribution', :aggregate_failures do
+          expect(x.mean).to be_within(1e-2).of(Math.gamma(1.2))
+          expect(x.var).to be_within(1e-2).of(Math.gamma(1.4) - Math.gamma(1.2)**2)
+        end
+      end
+    end
+
+    context 'when negative value is given to k' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.weibull(x, k: -5) }.to raise_error(ArgumentError, 'k must be > 0')
+      end
+    end
+
+    context 'when negative value is given to scale' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.weibull(x, k: 1, scale: -10) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when zero is given to k' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.weibull(x, k: 0) }.to raise_error(ArgumentError, 'k must be > 0')
+      end
+    end
+
+    context 'when zero is given to scale' do
+      let(:x) { Numo::DFloat.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.weibull(x, k: 1, scale: 0) }.to raise_error(ArgumentError, 'scale must be > 0')
+      end
+    end
+
+    context 'when array type is Int32' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises TypeError' do
+        expect { rng.weibull(x, k: 1) }.to raise_error(TypeError, 'invalid NArray class, it must be DFloat or SFloat')
+      end
+    end
+  end
+
   describe '#discrete' do
     let(:w) { Numo::DFloat[0.1, 0.6, 0.3] }
 
