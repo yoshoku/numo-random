@@ -17,6 +17,56 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#binomial' do
+    [Numo::Int8, Numo::Int16, Numo::Int32, Numo::Int64,
+     Numo::UInt8, Numo::UInt16, Numo::UInt32, Numo::UInt64].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(1000).tap { |x| rng.binomial(x, n: 50, p: 0.4) } }
+
+        it 'obtained randomized integer number from a binomial distribution', :aggregate_failures do
+          expect(x).to be_a(klass)
+          expect(x.median).to be_within(1e-2).of(20)
+        end
+      end
+    end
+
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(5) }
+
+        it 'raises TypeError' do
+          expect do
+            rng.binomial(x, n: 5, p: 0.5)
+          end.to raise_error(TypeError, 'invalid NArray class, it must be integer typed array')
+        end
+      end
+    end
+
+    context 'when negative value is given to n' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.binomial(x, n: -1, p: 0.5) }.to raise_error(ArgumentError, 'n must be a non-negative value')
+      end
+    end
+
+    context 'when negative value is given to p' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.binomial(x, n: 5, p: -0.1) }.to raise_error(ArgumentError, 'p must be >= 0 and <= 1')
+      end
+    end
+
+    context 'when a value greater then 1 is given to p' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.binomial(x, n: 5, p: 1.1) }.to raise_error(ArgumentError, 'p must be >= 0 and <= 1')
+      end
+    end
+  end
+
   describe '#exponential' do
     [Numo::SFloat, Numo::DFloat].each do |klass|
       context "when array type is #{klass}" do

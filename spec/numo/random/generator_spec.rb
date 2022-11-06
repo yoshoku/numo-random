@@ -17,6 +17,18 @@ RSpec.describe Numo::Random::Generator do
     end
   end
 
+  describe '#binomial' do
+    %i[int8 int16 int32 int64 uint8 uint16 uint32 uint64].each do |dtype|
+      context "when array type is #{dtype}" do
+        let(:x) { rng.binomial(shape: [1000], n: 50, p: 0.4, dtype: dtype) }
+
+        it 'obtained randomized integer number from a binomial distribution', :aggregate_failures do
+          expect(x.median).to be_within(1e-2).of(20)
+        end
+      end
+    end
+  end
+
   describe '#exponential' do
     context 'when array type is DFloat' do
       let(:x) { rng.exponential(shape: [500, 20], scale: 0.5) }
