@@ -169,7 +169,7 @@ private:
     ID kw_table[2] = { rb_intern("n"), rb_intern("p") };
     VALUE kw_values[2] = { Qundef, Qundef };
     rb_scan_args(argc, argv, "1:", &x, &kw_args);
-    rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
+    rb_get_kwargs(kw_args, kw_table, 2, 0, kw_values);
 
     const VALUE klass = rb_obj_class(x);
     if (klass != numo_cInt8 && klass != numo_cInt16 && klass != numo_cInt32 && klass != numo_cInt64
@@ -220,7 +220,7 @@ private:
     ID kw_table[2] = { rb_intern("n"), rb_intern("p") };
     VALUE kw_values[2] = { Qundef, Qundef };
     rb_scan_args(argc, argv, "1:", &x, &kw_args);
-    rb_get_kwargs(kw_args, kw_table, 0, 2, kw_values);
+    rb_get_kwargs(kw_args, kw_table, 2, 0, kw_values);
 
     const VALUE klass = rb_obj_class(x);
     if (klass != numo_cInt8 && klass != numo_cInt16 && klass != numo_cInt32 && klass != numo_cInt64
