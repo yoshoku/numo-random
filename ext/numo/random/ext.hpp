@@ -426,8 +426,8 @@ private:
   static VALUE _numo_random_pcg64_poisson(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
-    ID kw_table[2] = { rb_intern("mean") };
-    VALUE kw_values[2] = { Qundef, Qundef };
+    ID kw_table[1] = { rb_intern("mean") };
+    VALUE kw_values[1] = { Qundef };
     rb_scan_args(argc, argv, "1:", &x, &kw_args);
     rb_get_kwargs(kw_args, kw_table, 0, 1, kw_values);
 
