@@ -127,6 +127,64 @@ RSpec.describe Numo::Random::PCG64 do
     end
   end
 
+  describe '#geometric' do
+    [Numo::Int8, Numo::Int16, Numo::Int32, Numo::Int64,
+     Numo::UInt8, Numo::UInt16, Numo::UInt32, Numo::UInt64].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(10_000).tap { |x| rng.geometric(x, p: 0.4) } }
+
+        it 'obtained randomized integer number from a geometric distribution', :aggregate_failures do
+          expect(x).to be_a(klass)
+          expect(x.eq(0).count.fdiv(10_000)).to be_within(1e-2).of(0.4)
+        end
+      end
+    end
+
+    [Numo::SFloat, Numo::DFloat].each do |klass|
+      context "when array type is #{klass}" do
+        let(:x) { klass.new(5) }
+
+        it 'raises TypeError' do
+          expect do
+            rng.geometric(x, p: 0.5)
+          end.to raise_error(TypeError, 'invalid NArray class, it must be integer typed array')
+        end
+      end
+    end
+
+    context 'when negative value is given to p' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.geometric(x, p: -0.1) }.to raise_error(ArgumentError, 'p must be > 0 and < 1')
+      end
+    end
+
+    context 'when zero is given to p' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.geometric(x, p: 0) }.to raise_error(ArgumentError, 'p must be > 0 and < 1')
+      end
+    end
+
+    context 'when a value greater then 1 is given to p' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.geometric(x, p: 1.1) }.to raise_error(ArgumentError, 'p must be > 0 and < 1')
+      end
+    end
+
+    context 'when one is given to p' do
+      let(:x) { Numo::Int32.new(5) }
+
+      it 'raises ArgumentError' do
+        expect { rng.geometric(x, p: 1) }.to raise_error(ArgumentError, 'p must be > 0 and < 1')
+      end
+    end
+  end
+
   describe '#exponential' do
     [Numo::SFloat, Numo::DFloat].each do |klass|
       context "when array type is #{klass}" do

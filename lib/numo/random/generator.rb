@@ -95,6 +95,24 @@ module Numo
         x
       end
 
+      # Generates array consists of random values according to a geometric distribution.
+      #
+      # @example
+      #   require 'numo/random'
+      #
+      #   rng = Numo::Random::Generator.new(seed: 42)
+      #   x = rng.geometric(shape: 1000, p: 0.4)
+      #
+      # @param shape [Integer | Array<Integer>] size of random array.
+      # @param p [Float] probability of success on each trial.
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::IntX | Numo::UIntX]
+      def geometric(shape:, p:, dtype: :int32)
+        x = klass(dtype).new(shape)
+        rng.geometric(x, p: p)
+        x
+      end
+
       # Generates array consists of random values with an exponential distribution.
       #
       # @example

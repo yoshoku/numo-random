@@ -60,6 +60,7 @@ public:
     rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
     rb_define_method(rb_cPCG64, "binomial", RUBY_METHOD_FUNC(_numo_random_pcg64_binomial), -1);
     rb_define_method(rb_cPCG64, "negative_binomial", RUBY_METHOD_FUNC(_numo_random_pcg64_negative_binomial), -1);
+    rb_define_method(rb_cPCG64, "geometric", RUBY_METHOD_FUNC(_numo_random_pcg64_geometric), -1);
     rb_define_method(rb_cPCG64, "exponential", RUBY_METHOD_FUNC(_numo_random_pcg64_exponential), -1);
     rb_define_method(rb_cPCG64, "gamma", RUBY_METHOD_FUNC(_numo_random_pcg64_gamma), -1);
     rb_define_method(rb_cPCG64, "gumbel", RUBY_METHOD_FUNC(_numo_random_pcg64_gumbel), -1);
@@ -247,6 +248,55 @@ private:
       _rand_negative_binomial<uint32_t>(self, x, n, p);
     } else if (klass == numo_cUInt64) {
       _rand_negative_binomial<uint64_t>(self, x, n, p);
+    }
+
+    RB_GC_GUARD(x);
+    return Qnil;
+  }
+
+  // #geometric
+
+  template<typename T> static void _rand_geometric(VALUE& self, VALUE& x, const double& p) {
+    pcg64* ptr = get_pcg64(self);
+    ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
+    std::geometric_distribution<T> geometric_dist(p);
+    ndfunc_t ndf = { _iter_rand<std::geometric_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
+    rand_opt_t<std::geometric_distribution<T>> opt = { geometric_dist, ptr };
+    na_ndloop3(&ndf, &opt, 1, x);
+  }
+
+  static VALUE _numo_random_pcg64_geometric(int argc, VALUE* argv, VALUE self) {
+    VALUE x = Qnil;
+    VALUE kw_args = Qnil;
+    ID kw_table[1] = { rb_intern("p") };
+    VALUE kw_values[1] = { Qundef };
+    rb_scan_args(argc, argv, "1:", &x, &kw_args);
+    rb_get_kwargs(kw_args, kw_table, 1, 0, kw_values);
+
+    const VALUE klass = rb_obj_class(x);
+    if (klass != numo_cInt8 && klass != numo_cInt16 && klass != numo_cInt32 && klass != numo_cInt64
+        && klass != numo_cUInt8 && klass != numo_cUInt16 && klass != numo_cUInt32 && klass != numo_cUInt64)
+      rb_raise(rb_eTypeError, "invalid NArray class, it must be integer typed array");
+
+    const double p = NUM2DBL(kw_values[0]);
+    if (p <= 0.0 || p >= 1.0) rb_raise(rb_eArgError, "p must be > 0 and < 1");
+
+    if (klass == numo_cInt8) {
+      _rand_geometric<int8_t>(self, x,  p);
+    } else if (klass == numo_cInt16) {
+      _rand_geometric<int16_t>(self, x, p);
+    } else if (klass == numo_cInt32) {
+      _rand_geometric<int32_t>(self, x, p);
+    } else if (klass == numo_cInt64) {
+      _rand_geometric<int64_t>(self, x, p);
+    } else if (klass == numo_cUInt8) {
+      _rand_geometric<uint8_t>(self, x, p);
+    } else if (klass == numo_cUInt16) {
+      _rand_geometric<uint16_t>(self, x, p);
+    } else if (klass == numo_cUInt32) {
+      _rand_geometric<uint32_t>(self, x, p);
+    } else if (klass == numo_cUInt64) {
+      _rand_geometric<uint64_t>(self, x, p);
     }
 
     RB_GC_GUARD(x);
