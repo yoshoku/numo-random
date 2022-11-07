@@ -17,6 +17,20 @@ RSpec.describe Numo::Random::Generator do
     end
   end
 
+  describe '#bernoulli' do
+    %i[int8 int16 int32 int64 uint8 uint16 uint32 uint64].each do |dtype|
+      context "when array type is #{dtype}" do
+        let(:x) { rng.bernoulli(shape: [10_000], p: 0.4, dtype: dtype) }
+
+        it 'obtained randomized integer number from a binomial distribution', :aggregate_failures do
+          expect(x.eq(1).count.fdiv(10_000)).to be_within(1e-2).of(0.4)
+          expect(x.eq(0).count.fdiv(10_000)).to be_within(1e-2).of(0.6)
+          expect(x.median).to eq(0)
+        end
+      end
+    end
+  end
+
   describe '#binomial' do
     %i[int8 int16 int32 int64 uint8 uint16 uint32 uint64].each do |dtype|
       context "when array type is #{dtype}" do

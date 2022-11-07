@@ -57,6 +57,22 @@ module Numo
         rng.random
       end
 
+      # Generates array consists of random values according to the Bernoulli distribution.
+      #
+      # @example
+      #   require 'numo/random'
+      #
+      #   rng = Numo::Random::Generator.new(seed: 42)
+      #   x = rng.bernoulli(shape: 1000, p: 0.4)
+      #
+      # @param shape [Integer | Array<Integer>] size of random array.
+      # @param p [Float] probability of success.
+      # @param dtype [Symbol] data type of random array.
+      # @return [Numo::IntX | Numo::UIntX]
+      def bernoulli(shape:, p:, dtype: :int32)
+        binomial(shape: shape, n: 1, p: p, dtype: dtype)
+      end
+
       # Generates array consists of random values according to a binomial distribution.
       #
       # @example
