@@ -1,5 +1,5 @@
-## [Unreleased]
-- Bernoulli distribution.
+## [0.4.0]
+- Add method for random number generation with bernoulli distribution: bernoulli, binomial, negative_binomial, and geometric.
 
 ## [0.3.0]
 - Change native extension filename.
