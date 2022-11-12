@@ -50,6 +50,32 @@ end
 ![normal2d.png](https://user-images.githubusercontent.com/5562409/197376738-ee8d2b12-1902-4a12-bcf3-757461f2f2db.png)
 
 
+An example of generating random numbers according to the Poisson distribution:
+
+```ruby
+require 'numo/narray'
+require 'numo/gnuplot'
+
+require 'numo/random'
+
+# Creating random number generator.
+rng = Numo::Random::Generator.new(seed: 9)
+
+# Generating random numbers with Poisson distribution.
+x = rng.poisson(shape: 10000, mean: 12)
+
+# Plotting the generated result.
+h = x.bincount
+
+Numo.gnuplot do
+  set(terminal: 'png')
+  set(output: 'poisson2d.png')
+  plot(h, with: 'boxes')
+end
+```
+
+![poisson2d.png](https://user-images.githubusercontent.com/5562409/201478863-61d31eb8-7c0b-4406-b255-fff29187a16a.png)
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/yoshoku/numo-random.
