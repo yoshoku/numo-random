@@ -24,4 +24,5 @@ extern "C" void Init_ext(void) {
   VALUE rb_mNumoRandom = rb_define_module_under(mNumo, "Random");
   RbNumoRandomPCG32::define_class(rb_mNumoRandom, "PCG32");
   RbNumoRandomPCG64::define_class(rb_mNumoRandom, "PCG64");
+  RbNumoRandomMT32::define_class(rb_mNumoRandom, "MT32");
 }

@@ -867,4 +867,21 @@ const rb_data_type_t RbNumoRandomPCG64::rng_type = {
   0
 };
 
+class RbNumoRandomMT32 : public RbNumoRandom<std::mt19937, RbNumoRandomMT32> {
+public:
+  static const rb_data_type_t rng_type;
+};
+
+const rb_data_type_t RbNumoRandomMT32::rng_type = {
+  "RbNumoRandomMT32",
+  {
+    NULL,
+    RbNumoRandomMT32::numo_random_free,
+    RbNumoRandomMT32::numo_random_size
+  },
+  NULL,
+  NULL,
+  0
+};
+
 #endif /* NUMO_RANDOM_EXT_HPP */
