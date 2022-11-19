@@ -24,10 +24,17 @@ module Numo
       # Creates a new random number generator.
       #
       # @param seed [Integer] random seed used to initialize the random number generator.
-      # @param algorithm [String] random number generation algorithm.
-      def initialize(seed: nil, algorithm: 'pcg64') # rubocop:disable Lint/UnusedMethodArgument
-        @algorithm = 'pcg64'
-        @rng = PCG64.new(seed: seed)
+      # @param algorithm [String] random number generation algorithm ('pcg32', 'pcg64').
+      def initialize(seed: nil, algorithm: 'pcg64')
+        @algorithm = algorithm.to_s
+        @rng = case @algorithm
+               when 'pcg32'
+                 PCG32.new(seed: seed)
+               when 'pcg64'
+                 PCG64.new(seed: seed)
+               else
+                 raise ArgumentError, "Numo::Random::Generator does not support '#{@algorithm}' algorithm"
+               end
       end
 
       # Returns the seed of random number generator.

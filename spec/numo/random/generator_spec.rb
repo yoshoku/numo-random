@@ -1,7 +1,37 @@
 # frozen_string_literal: true
 
 RSpec.describe Numo::Random::Generator do
-  subject(:rng) { described_class.new(seed: 42) }
+  subject(:rng) { described_class.new(seed: 42, algorithm: algorithm) }
+
+  let(:algorithm) { 'pcg64' }
+
+  describe '#initialize' do
+    context "when algorithm args is 'pcg64'" do
+      let(:algorithm) { 'pcg64' }
+
+      it 'uses PCG32 class for random number generator', :aggregate_failures do
+        expect(rng.algorithm).to eq('pcg64')
+        expect(rng.instance_variable_get(:@rng)).to be_a(Numo::Random::PCG64)
+      end
+    end
+
+    context "when algorithm args is 'pcg32'" do
+      let(:algorithm) { 'pcg32' }
+
+      it 'uses PCG32 class for random number generator', :aggregate_failures do
+        expect(rng.algorithm).to eq('pcg32')
+        expect(rng.instance_variable_get(:@rng)).to be_a(Numo::Random::PCG32)
+      end
+    end
+
+    context 'when wrong algorithm args given' do
+      let(:algorithm) { 'none' }
+
+      it 'raises ArgumentError' do
+        expect { rng }.to raise_error(ArgumentError, "Numo::Random::Generator does not support 'none' algorithm")
+      end
+    end
+  end
 
   describe '#seed= and #seed' do
     it 'sets and gets random seed', :aggregate_failures do
