@@ -833,6 +833,23 @@ private:
   }
 };
 
+class RbNumoRandomPCG32 : public RbNumoRandom<pcg32, RbNumoRandomPCG32> {
+public:
+  static const rb_data_type_t rng_type;
+};
+
+const rb_data_type_t RbNumoRandomPCG32::rng_type = {
+  "RbNumoRandomPCG32",
+  {
+    NULL,
+    RbNumoRandomPCG32::numo_random_free,
+    RbNumoRandomPCG32::numo_random_size
+  },
+  NULL,
+  NULL,
+  0
+};
+
 class RbNumoRandomPCG64 : public RbNumoRandom<pcg64, RbNumoRandomPCG64> {
 public:
   static const rb_data_type_t rng_type;
