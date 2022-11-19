@@ -28,74 +28,74 @@
 
 #include <pcg_random.hpp>
 
-class RbNumoRandomPCG64 {
+template<class Rng, class Impl> class RbNumoRandom {
 public:
-  static VALUE numo_random_pcg64_alloc(VALUE self) {
-    pcg64* ptr = (pcg64*)ruby_xmalloc(sizeof(pcg64));
-    new (ptr) pcg64();
-    return TypedData_Wrap_Struct(self, &pcg64_type, ptr);
+  // static const rb_data_type_t rng_type;
+
+  static VALUE numo_random_alloc(VALUE self) {
+    Rng* ptr = (Rng*)ruby_xmalloc(sizeof(Rng));
+    new (ptr) Rng();
+    return TypedData_Wrap_Struct(self, &Impl::rng_type, ptr);
   }
 
-  static void numo_random_pcg64_free(void* ptr) {
-    ((pcg64*)ptr)->~pcg64();
+  static void numo_random_free(void* ptr) {
+    ((Rng*)ptr)->~Rng();
     ruby_xfree(ptr);
   }
 
-  static size_t numo_random_pcg64_size(const void* ptr) {
-    return sizeof(*((pcg64*)ptr));
+  static size_t numo_random_size(const void* ptr) {
+    return sizeof(*((Rng*)ptr));
   }
 
-  static pcg64* get_pcg64(VALUE self) {
-    pcg64* ptr;
-    TypedData_Get_Struct(self, pcg64, &pcg64_type, ptr);
+  static Rng* get_rng(VALUE self) {
+    Rng* ptr;
+    TypedData_Get_Struct(self, Rng, &Impl::rng_type, ptr);
     return ptr;
   }
 
-  static VALUE define_class(VALUE rb_mNumoRandom) {
-    VALUE rb_cPCG64 = rb_define_class_under(rb_mNumoRandom, "PCG64", rb_cObject);
-    rb_define_alloc_func(rb_cPCG64, numo_random_pcg64_alloc);
-    rb_define_method(rb_cPCG64, "initialize", RUBY_METHOD_FUNC(_numo_random_pcg64_init), -1);
-    rb_define_method(rb_cPCG64, "seed=", RUBY_METHOD_FUNC(_numo_random_pcg64_set_seed), 1);
-    rb_define_method(rb_cPCG64, "seed", RUBY_METHOD_FUNC(_numo_random_pcg64_get_seed), 0);
-    rb_define_method(rb_cPCG64, "random", RUBY_METHOD_FUNC(_numo_random_pcg64_random), 0);
-    rb_define_method(rb_cPCG64, "binomial", RUBY_METHOD_FUNC(_numo_random_pcg64_binomial), -1);
-    rb_define_method(rb_cPCG64, "negative_binomial", RUBY_METHOD_FUNC(_numo_random_pcg64_negative_binomial), -1);
-    rb_define_method(rb_cPCG64, "geometric", RUBY_METHOD_FUNC(_numo_random_pcg64_geometric), -1);
-    rb_define_method(rb_cPCG64, "exponential", RUBY_METHOD_FUNC(_numo_random_pcg64_exponential), -1);
-    rb_define_method(rb_cPCG64, "gamma", RUBY_METHOD_FUNC(_numo_random_pcg64_gamma), -1);
-    rb_define_method(rb_cPCG64, "gumbel", RUBY_METHOD_FUNC(_numo_random_pcg64_gumbel), -1);
-    rb_define_method(rb_cPCG64, "poisson", RUBY_METHOD_FUNC(_numo_random_pcg64_poisson), -1);
-    rb_define_method(rb_cPCG64, "weibull", RUBY_METHOD_FUNC(_numo_random_pcg64_weibull), -1);
-    rb_define_method(rb_cPCG64, "discrete", RUBY_METHOD_FUNC(_numo_random_pcg64_discrete), -1);
-    rb_define_method(rb_cPCG64, "uniform", RUBY_METHOD_FUNC(_numo_random_pcg64_uniform), -1);
-    rb_define_method(rb_cPCG64, "cauchy", RUBY_METHOD_FUNC(_numo_random_pcg64_cauchy), -1);
-    rb_define_method(rb_cPCG64, "chisquare", RUBY_METHOD_FUNC(_numo_random_pcg64_chisquare), -1);
-    rb_define_method(rb_cPCG64, "f", RUBY_METHOD_FUNC(_numo_random_pcg64_f), -1);
-    rb_define_method(rb_cPCG64, "normal", RUBY_METHOD_FUNC(_numo_random_pcg64_normal), -1);
-    rb_define_method(rb_cPCG64, "lognormal", RUBY_METHOD_FUNC(_numo_random_pcg64_lognormal), -1);
-    rb_define_method(rb_cPCG64, "standard_t", RUBY_METHOD_FUNC(_numo_random_pcg64_standard_t), -1);
-    return rb_cPCG64;
+  static VALUE define_class(VALUE rb_mNumoRandom, const char* class_name) {
+    VALUE rb_cRng = rb_define_class_under(rb_mNumoRandom, class_name, rb_cObject);
+    rb_define_alloc_func(rb_cRng, numo_random_alloc);
+    rb_define_method(rb_cRng, "initialize", RUBY_METHOD_FUNC(_numo_random_init), -1);
+    rb_define_method(rb_cRng, "seed=", RUBY_METHOD_FUNC(_numo_random_set_seed), 1);
+    rb_define_method(rb_cRng, "seed", RUBY_METHOD_FUNC(_numo_random_get_seed), 0);
+    rb_define_method(rb_cRng, "random", RUBY_METHOD_FUNC(_numo_random_random), 0);
+    rb_define_method(rb_cRng, "binomial", RUBY_METHOD_FUNC(_numo_random_binomial), -1);
+    rb_define_method(rb_cRng, "negative_binomial", RUBY_METHOD_FUNC(_numo_random_negative_binomial), -1);
+    rb_define_method(rb_cRng, "geometric", RUBY_METHOD_FUNC(_numo_random_geometric), -1);
+    rb_define_method(rb_cRng, "exponential", RUBY_METHOD_FUNC(_numo_random_exponential), -1);
+    rb_define_method(rb_cRng, "gamma", RUBY_METHOD_FUNC(_numo_random_gamma), -1);
+    rb_define_method(rb_cRng, "gumbel", RUBY_METHOD_FUNC(_numo_random_gumbel), -1);
+    rb_define_method(rb_cRng, "poisson", RUBY_METHOD_FUNC(_numo_random_poisson), -1);
+    rb_define_method(rb_cRng, "weibull", RUBY_METHOD_FUNC(_numo_random_weibull), -1);
+    rb_define_method(rb_cRng, "discrete", RUBY_METHOD_FUNC(_numo_random_discrete), -1);
+    rb_define_method(rb_cRng, "uniform", RUBY_METHOD_FUNC(_numo_random_uniform), -1);
+    rb_define_method(rb_cRng, "cauchy", RUBY_METHOD_FUNC(_numo_random_cauchy), -1);
+    rb_define_method(rb_cRng, "chisquare", RUBY_METHOD_FUNC(_numo_random_chisquare), -1);
+    rb_define_method(rb_cRng, "f", RUBY_METHOD_FUNC(_numo_random_f), -1);
+    rb_define_method(rb_cRng, "normal", RUBY_METHOD_FUNC(_numo_random_normal), -1);
+    rb_define_method(rb_cRng, "lognormal", RUBY_METHOD_FUNC(_numo_random_lognormal), -1);
+    rb_define_method(rb_cRng, "standard_t", RUBY_METHOD_FUNC(_numo_random_standard_t), -1);
+    return rb_cRng;
   }
 
 private:
-  static const rb_data_type_t pcg64_type;
-
   // #initialize
 
-  static VALUE _numo_random_pcg64_init(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_init(int argc, VALUE* argv, VALUE self) {
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("seed") };
     VALUE kw_values[1] = { Qundef };
     rb_scan_args(argc, argv, ":", &kw_args);
     rb_get_kwargs(kw_args, kw_table, 0, 1, kw_values);
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     if (kw_values[0] == Qundef || NIL_P(kw_values[0])) {
       std::random_device rd;
       const unsigned int seed = rd();
-      new (ptr) pcg64(seed);
+      new (ptr) Rng(seed);
       rb_iv_set(self, "seed", UINT2NUM(seed));
     } else {
-      new (ptr) pcg64(NUM2LONG(kw_values[0]));
+      new (ptr) Rng(NUM2LONG(kw_values[0]));
       rb_iv_set(self, "seed", kw_values[0]);
     }
     return Qnil;
@@ -103,23 +103,23 @@ private:
 
   // #seed=
 
-  static VALUE _numo_random_pcg64_set_seed(VALUE self, VALUE seed) {
-    get_pcg64(self)->seed(NUM2LONG(seed));
+  static VALUE _numo_random_set_seed(VALUE self, VALUE seed) {
+    get_rng(self)->seed(NUM2LONG(seed));
     rb_iv_set(self, "seed", seed);
     return Qnil;
   }
 
   // #seed
 
-  static VALUE _numo_random_pcg64_get_seed(VALUE self) {
+  static VALUE _numo_random_get_seed(VALUE self) {
     return rb_iv_get(self, "seed");
   }
 
   // #random
 
-  static VALUE _numo_random_pcg64_random(VALUE self) {
+  static VALUE _numo_random_random(VALUE self) {
     std::uniform_real_distribution<double> uniform_dist(0, 1);
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     const double x = uniform_dist(*ptr);
     return DBL2NUM(x);
   }
@@ -128,7 +128,7 @@ private:
 
   template<class D> struct rand_opt_t {
     D dist;
-    pcg64* rnd;
+    Rng* rnd;
   };
 
   template<class D, typename T> static void _iter_rand(na_loop_t* const lp) {
@@ -155,7 +155,7 @@ private:
   // #binomial
 
   template<typename T> static void _rand_binomial(VALUE& self, VALUE& x, const long n, const double& p) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::binomial_distribution<T> binomial_dist(n, p);
     ndfunc_t ndf = { _iter_rand<std::binomial_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -163,7 +163,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_binomial(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_binomial(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("n"), rb_intern("p") };
@@ -206,7 +206,7 @@ private:
   // #negative_binomial
 
   template<typename T> static void _rand_negative_binomial(VALUE& self, VALUE& x, const long n, const double& p) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::negative_binomial_distribution<T> negative_binomial_dist(n, p);
     ndfunc_t ndf = { _iter_rand<std::negative_binomial_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -214,7 +214,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_negative_binomial(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_negative_binomial(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("n"), rb_intern("p") };
@@ -257,7 +257,7 @@ private:
   // #geometric
 
   template<typename T> static void _rand_geometric(VALUE& self, VALUE& x, const double& p) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::geometric_distribution<T> geometric_dist(p);
     ndfunc_t ndf = { _iter_rand<std::geometric_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -265,7 +265,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_geometric(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_geometric(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("p") };
@@ -306,7 +306,7 @@ private:
   // #exponential
 
   template<typename T> static void _rand_exponential(VALUE& self, VALUE& x, const double& lam) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::exponential_distribution<T> exponential_dist(lam);
     ndfunc_t ndf = { _iter_rand<std::exponential_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -314,7 +314,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_exponential(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_exponential(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("scale") };
@@ -342,7 +342,7 @@ private:
   // #gamma
 
   template<typename T> static void _rand_gamma(VALUE& self, VALUE& x, const double& k, const double&scale) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::gamma_distribution<T> gamma_dist(k, scale);
     ndfunc_t ndf = { _iter_rand<std::gamma_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -350,7 +350,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_gamma(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_gamma(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("k"), rb_intern("scale") };
@@ -379,7 +379,7 @@ private:
   // #gumbel
 
   template<typename T> static void _rand_gumbel(VALUE& self, VALUE& x, const double& loc, const double&scale) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::extreme_value_distribution<T> extreme_value_dist(loc, scale);
     ndfunc_t ndf = { _iter_rand<std::extreme_value_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -387,7 +387,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_gumbel(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_gumbel(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("loc"), rb_intern("scale") };
@@ -415,7 +415,7 @@ private:
   // #poisson
 
   template<typename T> static void _rand_poisson(VALUE& self, VALUE& x, const double& mean) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::poisson_distribution<T> poisson_dist(mean);
     ndfunc_t ndf = { _iter_rand<std::poisson_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -423,7 +423,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_poisson(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_poisson(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("mean") };
@@ -464,7 +464,7 @@ private:
   // #weibull
 
   template<typename T> static void _rand_weibull(VALUE& self, VALUE& x, const double& k, const double&scale) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::weibull_distribution<T> weibull_dist(k, scale);
     ndfunc_t ndf = { _iter_rand<std::weibull_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -472,7 +472,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_weibull(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_weibull(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("k"), rb_intern("scale") };
@@ -501,7 +501,7 @@ private:
   // #discrete
 
   template<typename T, typename P> static void _rand_discrete(VALUE& self, VALUE& x, const std::vector<P>& weight) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::discrete_distribution<T> discrete_dist(weight.begin(), weight.end());
     ndfunc_t ndf = { _iter_rand<std::discrete_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -509,7 +509,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_discrete(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_discrete(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("weight") };
@@ -584,7 +584,7 @@ private:
   // #uniform
 
   template<typename T> static void _rand_uniform(VALUE& self, VALUE& x, const double& low, const double& high) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::uniform_real_distribution<T> uniform_dist(low, high);
     ndfunc_t ndf = { _iter_rand<std::uniform_real_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -592,7 +592,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_uniform(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_uniform(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("low"), rb_intern("high") };
@@ -620,7 +620,7 @@ private:
   // #cauchy
 
   template<typename T> static void _rand_cauchy(VALUE& self, VALUE& x, const double& loc, const double& scale) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::cauchy_distribution<T> cauchy_dist(loc, scale);
     ndfunc_t ndf = { _iter_rand<std::cauchy_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -628,7 +628,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_cauchy(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_cauchy(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("loc"), rb_intern("scale") };
@@ -656,7 +656,7 @@ private:
   // #chisqure
 
   template<typename T> static void _rand_chisquare(VALUE& self, VALUE& x, const double& df) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::chi_squared_distribution<T> chisquare_dist(df);
     ndfunc_t ndf = { _iter_rand<std::chi_squared_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -664,7 +664,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_chisquare(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_chisquare(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("df") };
@@ -691,7 +691,7 @@ private:
   // #f
 
   template<typename T> static void _rand_f(VALUE& self, VALUE& x, const double& dfnum, const double& dfden) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::fisher_f_distribution<T> f_dist(dfnum, dfden);
     ndfunc_t ndf = { _iter_rand<std::fisher_f_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -699,7 +699,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_f(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_f(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("dfnum"), rb_intern("dfden") };
@@ -728,7 +728,7 @@ private:
   // #normal
 
   template<typename T> static void _rand_normal(VALUE& self, VALUE& x, const double& loc, const double& scale) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::normal_distribution<T> normal_dist(loc, scale);
     ndfunc_t ndf = { _iter_rand<std::normal_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -736,7 +736,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_normal(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_normal(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("loc"), rb_intern("scale") };
@@ -764,7 +764,7 @@ private:
   // #lognormal
 
   template<typename T> static void _rand_lognormal(VALUE& self, VALUE& x, const double& mean, const double& sigma) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::lognormal_distribution<T> lognormal_dist(mean, sigma);
     ndfunc_t ndf = { _iter_rand<std::lognormal_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -772,7 +772,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_lognormal(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_lognormal(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[2] = { rb_intern("mean"), rb_intern("sigma") };
@@ -800,7 +800,7 @@ private:
   // #standard_t
 
   template<typename T> static void _rand_t(VALUE& self, VALUE& x, const double& df) {
-    pcg64* ptr = get_pcg64(self);
+    Rng* ptr = get_rng(self);
     ndfunc_arg_in_t ain[1] = { { OVERWRITE, 0 } };
     std::student_t_distribution<T> t_dist(df);
     ndfunc_t ndf = { _iter_rand<std::student_t_distribution<T>, T>, FULL_LOOP, 1, 0, ain, 0 };
@@ -808,7 +808,7 @@ private:
     na_ndloop3(&ndf, &opt, 1, x);
   }
 
-  static VALUE _numo_random_pcg64_standard_t(int argc, VALUE* argv, VALUE self) {
+  static VALUE _numo_random_standard_t(int argc, VALUE* argv, VALUE self) {
     VALUE x = Qnil;
     VALUE kw_args = Qnil;
     ID kw_table[1] = { rb_intern("df") };
@@ -833,16 +833,21 @@ private:
   }
 };
 
-const rb_data_type_t RbNumoRandomPCG64::pcg64_type = {
+class RbNumoRandomPCG64 : public RbNumoRandom<pcg64, RbNumoRandomPCG64> {
+public:
+  static const rb_data_type_t rng_type;
+};
+
+const rb_data_type_t RbNumoRandomPCG64::rng_type = {
   "RbNumoRandomPCG64",
   {
     NULL,
-    RbNumoRandomPCG64::numo_random_pcg64_free,
-    RbNumoRandomPCG64::numo_random_pcg64_size
+    RbNumoRandomPCG64::numo_random_free,
+    RbNumoRandomPCG64::numo_random_size
   },
   NULL,
   NULL,
-  RUBY_TYPED_FREE_IMMEDIATELY
+  0
 };
 
 #endif /* NUMO_RANDOM_EXT_HPP */

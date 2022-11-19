@@ -22,5 +22,5 @@ extern "C" void Init_ext(void) {
   rb_require("numo/narray");
 
   VALUE rb_mNumoRandom = rb_define_module_under(mNumo, "Random");
-  RbNumoRandomPCG64::define_class(rb_mNumoRandom);
+  RbNumoRandomPCG64::define_class(rb_mNumoRandom, "PCG64");
 }
