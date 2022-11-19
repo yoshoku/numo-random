@@ -25,4 +25,5 @@ extern "C" void Init_ext(void) {
   RbNumoRandomPCG32::define_class(rb_mNumoRandom, "PCG32");
   RbNumoRandomPCG64::define_class(rb_mNumoRandom, "PCG64");
   RbNumoRandomMT32::define_class(rb_mNumoRandom, "MT32");
+  RbNumoRandomMT64::define_class(rb_mNumoRandom, "MT64");
 }
