@@ -1,3 +1,16 @@
+## [0.5.0]
+- Support 32-bit PCG and Mersenne Twister.
+
+```ruby
+require 'numo/random'
+
+# specify the pseudo random number generation algorithm by setting the algorithm argument of constructor.
+rng = Numo::Random::Generator.new(algorithm: 'pcg32')
+rng = Numo::Random::Generator.new(algorithm: 'pcg64') # default
+rng = Numo::Random::Generator.new(algorithm: 'mt32')
+rng = Numo::Random::Generator.new(algorithm: 'mt64')
+```
+
 ## [0.4.0]
 - Add method for random number generation with bernoulli distribution: bernoulli, binomial, negative_binomial, and geometric.
 
