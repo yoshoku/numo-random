@@ -24,10 +24,14 @@ module Numo
       # Creates a new random number generator.
       #
       # @param seed [Integer] random seed used to initialize the random number generator.
-      # @param algorithm [String] random number generation algorithm ('pcg32', 'pcg64').
-      def initialize(seed: nil, algorithm: 'pcg64')
+      # @param algorithm [String] random number generation algorithm ('mt32', 'mt64', 'pcg32', and 'pcg64').
+      def initialize(seed: nil, algorithm: 'pcg64') # rubocop:disable Metrics/MethodLength
         @algorithm = algorithm.to_s
         @rng = case @algorithm
+               when 'mt32'
+                 MT32.new(seed: seed)
+               when 'mt64'
+                 MT64.new(seed: seed)
                when 'pcg32'
                  PCG32.new(seed: seed)
                when 'pcg64'

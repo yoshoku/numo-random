@@ -6,12 +6,21 @@ RSpec.describe Numo::Random::Generator do
   let(:algorithm) { 'pcg64' }
 
   describe '#initialize' do
-    context "when algorithm args is 'pcg64'" do
-      let(:algorithm) { 'pcg64' }
+    context "when algorithm args is 'mt32'" do
+      let(:algorithm) { 'mt32' }
 
-      it 'uses PCG32 class for random number generator', :aggregate_failures do
-        expect(rng.algorithm).to eq('pcg64')
-        expect(rng.instance_variable_get(:@rng)).to be_a(Numo::Random::PCG64)
+      it 'uses MT32 class for random number generator', :aggregate_failures do
+        expect(rng.algorithm).to eq('mt32')
+        expect(rng.instance_variable_get(:@rng)).to be_a(Numo::Random::MT32)
+      end
+    end
+
+    context "when algorithm args is 'mt64'" do
+      let(:algorithm) { 'mt64' }
+
+      it 'uses MT64 class for random number generator', :aggregate_failures do
+        expect(rng.algorithm).to eq('mt64')
+        expect(rng.instance_variable_get(:@rng)).to be_a(Numo::Random::MT64)
       end
     end
 
@@ -21,6 +30,15 @@ RSpec.describe Numo::Random::Generator do
       it 'uses PCG32 class for random number generator', :aggregate_failures do
         expect(rng.algorithm).to eq('pcg32')
         expect(rng.instance_variable_get(:@rng)).to be_a(Numo::Random::PCG32)
+      end
+    end
+
+    context "when algorithm args is 'pcg64'" do
+      let(:algorithm) { 'pcg64' }
+
+      it 'uses PCG64 class for random number generator', :aggregate_failures do
+        expect(rng.algorithm).to eq('pcg64')
+        expect(rng.instance_variable_get(:@rng)).to be_a(Numo::Random::PCG64)
       end
     end
 
