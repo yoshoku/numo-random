@@ -26,4 +26,10 @@ $CXXFLAGS << " -std=c++11"
 $INCFLAGS << " -I$(srcdir)/src"
 $VPATH << "$(srcdir)/src"
 
+if RUBY_PLATFORM.match?(/darwin/) && Gem::Version.new('3.1.0') <= Gem::Version.new(RUBY_VERSION)
+  if try_link('int main(void){return 0;}', '-Wl,-undefined,dynamic_lookup')
+    $LDFLAGS << ' -Wl,-undefined,dynamic_lookup'
+  end
+end
+
 create_makefile("numo/random/ext")
