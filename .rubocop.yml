@@ -45,3 +45,6 @@ RSpec/NamedSubject:
 
 RSpec/NestedGroups:
   Max: 5
+
+Style/YodaExpression:
+  Enabled: false
