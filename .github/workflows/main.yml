@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev*
   pull_request:
 
 jobs:
@@ -20,6 +21,28 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Build and test with Rake
+        run: bundle exec rake
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby 3.2
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+          bundler-cache: true
+      - name: Build and test with Rake
+        run: bundle exec rake
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby 3.2
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
           bundler-cache: true
       - name: Build and test with Rake
         run: bundle exec rake
