@@ -7,6 +7,8 @@
 
 Numo::Random provides random number generation with several distributions for Numo::NArray.
 
+Note: Since v0.6.0, this gem uses [Numo::NArray Alternative](https://github.com/yoshoku/numo-narray-alt) instead of Numo::NArray as a dependency.
+
 ## Installation
 
 Add this line to your application's Gemfile:

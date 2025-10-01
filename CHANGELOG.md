@@ -1,3 +1,9 @@
+## [[0.6.0](https://github.com/yoshoku/numo-random/compare/v0.5.1...v0.6.0)] - 2025-10-01
+
+**Breaking change**
+
+- Change dependency from numo-narray to [numo-narray-alt](https://github.com/yoshoku/numo-narray-alt).
+
 ## [0.5.1]
 
 - Fix build failure with Xcode 14 and Ruby 3.1.x.
