@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/yoshoku/numo-random/actions/workflows/main.yml/badge.svg)](https://github.com/yoshoku/numo-random/actions/workflows/main.yml)
 [![Gem Version](https://badge.fury.io/rb/numo-random.svg)](https://badge.fury.io/rb/numo-random)
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://github.com/yoshoku/numo-random/blob/main/LICENSE.txt)
-[![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://yoshoku.github.io/numo-random/doc/)
+[![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://gemdocs.org/gems/numo-random/)
 
 Numo::Random provides random number generation with several distributions for Numo::NArray.
 
