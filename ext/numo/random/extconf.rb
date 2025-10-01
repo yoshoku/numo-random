@@ -20,7 +20,18 @@ if RUBY_PLATFORM =~ /mswin|cygwin|mingw/
   abort "libnarray.a not found." unless have_library("narray", "nary_new")
 end
 
-abort "libstdc++ is not found." unless have_library("stdc++")
+have_libcpp = false
+if RUBY_PLATFORM.include?('darwin')
+  if have_library('c++')
+    have_libcpp = true
+  else
+    warn 'libc++ is not found.'
+  end
+end
+
+if !have_libcpp && !RUBY_PLATFORM.include?('mswin')
+  warn 'libstdc++ is not found.' unless have_library('stdc++')
+end
 
 $CXXFLAGS << " -std=c++11"
 $INCFLAGS << " -I$(srcdir)/src"
