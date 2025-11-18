@@ -3,6 +3,6 @@
 module Numo
   module Random
     # The version of Numo::Random you install.
-    VERSION = '0.6.0'
+    VERSION = '0.6.1'
   end
 end

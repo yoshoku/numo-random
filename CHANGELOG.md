@@ -1,3 +1,8 @@
+## [[0.6.1](https://github.com/yoshoku/numo-random/compare/v0.6.0...v0.6.1)] - 2025-11-18
+
+- Set the required version of numo-narray-alt to 0.9.9 or higher.
+- Change require statement to explicitly load numo/narray/alt.
+
 ## [[0.6.0](https://github.com/yoshoku/numo-random/compare/v0.5.1...v0.6.0)] - 2025-10-01
 
 **Breaking change**
