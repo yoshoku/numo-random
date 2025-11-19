@@ -1,3 +1,8 @@
+## [[0.6.2](https://github.com/yoshoku/numo-random/compare/v0.6.1...v0.6.2)] - 2025-11-19
+
+- Fix to use require for compatibility with distributions installing extensions separately.
+- Set the required version of numo-narray-alt to 0.9.10 or higher.
+
 ## [[0.6.1](https://github.com/yoshoku/numo-random/compare/v0.6.0...v0.6.1)] - 2025-11-18
 
 - Set the required version of numo-narray-alt to 0.9.9 or higher.
