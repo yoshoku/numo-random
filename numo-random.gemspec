@@ -30,5 +30,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.extensions = ['ext/numo/random/extconf.rb']
 
-  spec.add_dependency 'numo-narray-alt', '~> 0.9.10'
+  spec.add_dependency 'numo-narray-alt', '>= 0.9.10', '< 0.11.0'
 end
