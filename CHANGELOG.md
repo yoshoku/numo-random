@@ -1,3 +1,7 @@
+## [[0.7.0](https://github.com/yoshoku/numo-random/compare/v0.6.2...v0.7.0)] - 2026-02-06
+
+- relax numo-narray-alt version constraint to >= 0.9.10, < 0.11.0.
+
 ## [[0.6.2](https://github.com/yoshoku/numo-random/compare/v0.6.1...v0.6.2)] - 2025-11-19
 
 - Fix to use require for compatibility with distributions installing extensions separately.
