@@ -13,3 +13,7 @@ gem 'rubocop-performance', '~> 1.15'
 gem 'rubocop-rake', '~> 0.6'
 gem 'rubocop-rspec', '~> 3.6'
 gem 'yard', '~> 0.9.37'
+
+group :memcheck, optional: true do
+  gem 'ruby_memcheck', '~> 3.0'
+end
