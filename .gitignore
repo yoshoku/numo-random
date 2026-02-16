@@ -11,6 +11,7 @@
 # rspec failure tracking
 .rspec_status
 *.swp
+*.so
 *.bundle
 *.lock
 mkmf.log
