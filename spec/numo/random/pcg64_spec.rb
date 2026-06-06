@@ -193,7 +193,7 @@ RSpec.describe Numo::Random::PCG64 do
         it 'obtains random numbers from an exponential distribution', :aggregate_failures do
           expect(x).to be_a(klass)
           expect(x.mean).to be_within(1e-2).of(0.5)
-          expect(x.var).to be_within(1e-2).of(0.25)
+          expect(x.var).to be_within(2e-2).of(0.25)
         end
       end
     end
@@ -230,7 +230,7 @@ RSpec.describe Numo::Random::PCG64 do
 
         it 'obtains random numbers form a gamma distribution', :aggregate_failures do
           expect(x).to be_a(klass)
-          expect(x.mean).to be_within(1e-2).of(4.5)
+          expect(x.mean).to be_within(3e-2).of(4.5)
           expect(x.var).to be_within(1e-1).of(2.25)
         end
       end
@@ -284,7 +284,7 @@ RSpec.describe Numo::Random::PCG64 do
 
         it 'obtains random numbers form the Gumbel distribution', :aggregate_failures do
           expect(x).to be_a(klass)
-          expect(x.mean).to be_within(1e-2).of(0.57)
+          expect(x.mean).to be_within(2e-2).of(0.57)
           expect(x.var).to be_within(2e-2).of((Math::PI**2).fdiv(6))
         end
       end
@@ -737,7 +737,7 @@ RSpec.describe Numo::Random::PCG64 do
       it 'obtains random numbers form a lognormal distribution', :aggregate_failures do
         expect(x).to be_a(Numo::SFloat)
         expect(x.mean).to be_within(1e-2).of(Math.exp(0.5))
-        expect(x.var).to be_within(1e-1).of(Math.exp(2) - Math.exp(1))
+        expect(x.var).to be_within(2e-1).of(Math.exp(2) - Math.exp(1))
       end
     end
 

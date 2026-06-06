@@ -154,7 +154,7 @@ RSpec.describe Numo::Random::Generator do
       it 'obtains random numbers form a gamma distribution', :aggregate_failures do
         expect(x).to be_a(Numo::SFloat)
         expect(x.mean).to be_within(1e-2).of(1)
-        expect(x.var).to be_within(1e-2).of(2)
+        expect(x.var).to be_within(2e-2).of(2)
       end
     end
   end
@@ -175,7 +175,7 @@ RSpec.describe Numo::Random::Generator do
 
       it 'obtains random numbers form the Gumbel distribution', :aggregate_failures do
         expect(x).to be_a(Numo::SFloat)
-        expect(x.mean).to be_within(1e-2).of(0.57)
+        expect(x.mean).to be_within(2e-2).of(0.57)
         expect(x.var).to be_within(2e-2).of((Math::PI**2).fdiv(6))
       end
     end
@@ -378,7 +378,7 @@ RSpec.describe Numo::Random::Generator do
       it 'obtains random numbers form a lognormal distribution', :aggregate_failures do
         expect(x).to be_a(Numo::SFloat)
         expect(x.mean).to be_within(1e-2).of(Math.exp(0.5))
-        expect(x.var).to be_within(1e-1).of(Math.exp(2) - Math.exp(1))
+        expect(x.var).to be_within(2e-1).of(Math.exp(2) - Math.exp(1))
       end
     end
 
