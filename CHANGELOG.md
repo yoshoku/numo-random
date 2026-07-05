@@ -1,3 +1,7 @@
+## [[0.8.0](https://github.com/yoshoku/numo-random/compare/v0.7.0...v0.8.0)] - 2026-07-05
+
+- relax numo-narray-alt upper bound to < 0.12.0.
+
 ## [[0.7.0](https://github.com/yoshoku/numo-random/compare/v0.6.2...v0.7.0)] - 2026-02-06
 
 - relax numo-narray-alt version constraint to >= 0.9.10, < 0.11.0.
